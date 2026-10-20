@@ -31,6 +31,10 @@ Bind package: "java.io" content: [
   type File
   @emit: "File($1)"
   constructor File path: String -> File
+  extend File [
+    /// create the directory and any missing parents
+    on mkdirs -> Bool
+  ]
 ]
 
 Bind package: "javax.imageio" imports: {"java.awt.image.BufferedImage" "java.io.File"} content: [

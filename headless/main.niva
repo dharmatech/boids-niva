@@ -1,7 +1,0 @@
-// Port of ~/journal/2026-09-02-aloe-racket/examples/boids.aloe
-
-demo = Flock demo
-
-demo step echo
-"" echo
-demo step step echo

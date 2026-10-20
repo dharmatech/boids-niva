@@ -1,0 +1,14 @@
+// `niva run png.niva`: no window. Saves a snapshot every 100 steps to
+// frames/frame-0.png, frames/frame-100.png, ...
+
+File path: "frames", mkdirs
+
+screen = Screen width: 900.0 height: 650.0
+mut flock = Flock random: 150 across: screen
+
+0 to: 400 do: [ frame ->
+  frame % 100 == 0 ifTrue: [
+    flock saveTo: "frames/frame-" + frame toString + ".png" screen: screen
+  ]
+  flock <- flock stepOn: screen
+]

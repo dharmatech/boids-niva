@@ -4,17 +4,29 @@ An idiomatic Niva port of Aloe's
 [examples/boids.aloe](../../2026-09-02-aloe-racket/examples/boids.aloe),
 plus two renderers.
 
-| Folder | What | Run |
-|---|---|---|
-| `sim/` | The port itself: `Vec2`, `Boid`, `Flock`. No `main.niva`; it's shared code. | — |
-| `headless/` | Aloe's 3-boid demo, printed. Tests pin step 1 to Aloe's exact output. | `niva run`, `niva test` |
-| `world/` | Rules that only the renderers need: `Screen`, random flocks, edge wrapping, a speed cap. | — |
-| `imgui/` | A window drawn with Dear ImGui (imgui-java), one step per frame. Esc quits. | `niva run` |
-| `png/` | Java2D, no window: writes `frame-0.png` … `frame-400.png`. | `niva run` |
+| Run | What |
+|---|---|
+| `niva run` | A window drawn with Dear ImGui (imgui-java), one step per frame. Esc quits. |
+| `niva run headless.niva` | Aloe's 3-boid demo, printed after one and two steps. |
+| `niva run png.niva` | Java2D, no window: writes `frames/frame-0.png` … `frame-400.png`. |
+| `niva test` | Pins step 1 to Aloe's exact output, plus a few rule checks. |
 
-Niva builds every `.niva` file under the folder that holds `main.niva`, and
-nothing outside it. So each front end is its own project and pulls in
-`sim/` (and `world/`) through a symlink.
+It's one Niva project. Niva compiles every `.niva` file under the folder
+that holds the entry file, but only the entry file's top-level code runs.
+So `main.niva`, `headless.niva` and `png.niva` are three entry points
+sharing the rest:
+
+| Folder | What |
+|---|---|
+| `sim/` | The port itself: `Vec2`, `Boid`, `Flock`. |
+| `world/` | Rules only the renderers need: `Screen`, random flocks, edge wrapping, a speed cap. |
+| `imgui/` | ImGui bindings, and `display.niva` (X11 or Wayland, and the scale). |
+| `java2d/` | Java2D bindings, and `Flock saveTo:` for snapshots. |
+| `tests/` | `niva test`. |
+
+`niva run` can't pass arguments to the program (`niva run main.niva png`
+just ignores `png`), hence entry files rather than a mode argument. A
+built jar does get them, as `Compiler cliArgs`.
 
 ## Aloe → Niva
 
@@ -40,7 +52,7 @@ is what classic boids do.
 
 ## Graphics options
 
-- **ImGui** (used in `imgui/`). This is what gavr uses: bazar has three
+- **ImGui** (the window, `main.niva`). This is what gavr uses: bazar has three
   ImGui programs, and the generated Gradle build has an ImGui fix for
   macOS. Immediate mode suits one-step-per-frame, and it comes with
   sliders and buttons for tuning the rules live.
@@ -66,7 +78,7 @@ is what classic boids do.
 
   It's capped at the monitor's refresh rate by vsync (30 fps on a 30 Hz
   monitor). A step takes 0.4 ms.
-- **Java2D** (used in `png/`). Built into the JDK, so no dependencies or
+- **Java2D** (`png.niva`). Built into the JDK, so no dependencies or
   native libraries. Good for snapshots and tests. A live Swing window
   would need the same `@emit "object : …"` trick the ImGui binding uses,
   to subclass `JPanel`.
