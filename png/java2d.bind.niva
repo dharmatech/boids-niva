@@ -1,0 +1,42 @@
+// Java2D + ImageIO: in every JDK, so no dependencies and no native libraries.
+
+Bind package: "java.awt" content: [
+  type Color
+  @emit: "Color($1, $2, $3)"
+  constructor Color r: Int g: Int b: Int -> Color
+
+  type Graphics2D
+  extend Graphics2D [
+    on setColor: Color -> Unit
+    @rename: "fillRect"
+    on fillRectX: Int y: Int w: Int h: Int -> Unit
+    @rename: "fillOval"
+    on fillOvalX: Int y: Int w: Int h: Int -> Unit
+    @rename: "drawLine"
+    on lineX1: Int y1: Int x2: Int y2: Int -> Unit
+    on dispose -> Unit
+  ]
+]
+
+Bind package: "java.awt.image" imports: {"java.awt.Graphics2D"} content: [
+  type BufferedImage
+  @emit: "BufferedImage($1, $2, BufferedImage.TYPE_INT_RGB)"
+  constructor BufferedImage width: Int height: Int -> BufferedImage
+  extend BufferedImage [
+    on createGraphics -> Graphics2D
+  ]
+]
+
+Bind package: "java.io" content: [
+  type File
+  @emit: "File($1)"
+  constructor File path: String -> File
+]
+
+Bind package: "javax.imageio" imports: {"java.awt.image.BufferedImage" "java.io.File"} content: [
+  type ImageIO
+  constructor ImageIO [
+    @rename: "write"
+    on write: BufferedImage format: String to: File -> Bool
+  ]
+]

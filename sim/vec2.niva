@@ -1,0 +1,27 @@
+/// A 2D vector of Doubles.
+/// Niva generics have no bounds (`T + T` doesn't resolve),
+/// so unlike Aloe's `(Point T)` this one is monomorphic.
+type Vec2 x: Double y: Double
+
+constructor Vec2 zero -> Vec2 = Vec2 x: 0.0 y: 0.0
+
+extend Vec2 [
+  on + other::Vec2 -> Vec2 = Vec2 x: x + other x y: y + other y
+  on - other::Vec2 -> Vec2 = Vec2 x: x - other x y: y - other y
+  on * k::Double -> Vec2 = Vec2 x: x * k y: y * k
+  on / k::Double -> Vec2 = Vec2 x: x / k y: y / k
+
+  on dot(other): Vec2 -> Double = x * other x + y * other y
+
+  /// squared distance, so neighbor checks need no sqrt
+  on dist2(other): Vec2 -> Double = [
+    d = this - other
+    ^ d dot: d
+  ]
+
+  on toString -> String = "($x, $y)"
+]
+
+/// centroid of a non-empty list of points
+List::Vec2 mean -> Vec2 =
+  (this inject: Vec2 zero into: [sum, p -> sum + p]) / this count toDouble

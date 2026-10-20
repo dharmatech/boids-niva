@@ -1,0 +1,45 @@
+/// One bird: where it is and where it's heading.
+type Boid position: Vec2 velocity: Vec2
+
+extend Boid [
+  /// other is ahead of us; a boid standing still sees everything
+  on canSee(other): Boid -> Bool = [
+    heading = velocity
+    ^ (heading dot: heading) > 0.0
+      ifTrue: [(heading dot: other position - position) > 0.0]
+      ifFalse: [true]
+  ]
+
+  /// the visible boids closer than r, excluding this one
+  on neighborsIn(flock): List::Boid within(r): Double -> List::Boid =
+    flock filter: [
+      d2 = position dist2: it position
+      (d2 > 0.0) && (d2 < (r * r)) && (this canSee: it)
+    ]
+
+  /// steer toward the center of the neighbors
+  on cohere(others): List::Boid -> Vec2 = others isEmpty
+    ifTrue: [Vec2 zero]
+    ifFalse: [((others map: [it position]) mean - position) * 0.01]
+
+  /// match the neighbors' average velocity
+  on align(others): List::Boid -> Vec2 = others isEmpty
+    ifTrue: [Vec2 zero]
+    ifFalse: [((others map: [it velocity]) mean - velocity) * 0.05]
+
+  /// push away from any boid within 5 units
+  on separateFrom(flock): List::Boid -> Vec2 = [
+    push = flock inject: Vec2 zero into: [sum, other ->
+      d2 = position dist2: other position
+      (d2 > 0.0) && (d2 < 25.0)
+        ifTrue: [sum + (position - other position)]
+        ifFalse: [sum]
+    ]
+    ^ push * 0.001
+  ]
+
+  on advance(newVelocity): Vec2 -> Boid =
+    Boid position: position + newVelocity velocity: newVelocity
+
+  on toString -> String = "Boid at $position moving $velocity"
+]

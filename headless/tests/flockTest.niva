@@ -1,0 +1,30 @@
+// Expected values are what ./bin/aloe prints for examples/boids.aloe
+
+Test firstStepMatchesAloe = [
+  Assert
+    that: Flock demo step toString
+    equals: """
+      Boid at (0.9869999999999999, 0.054) moving (0.9869999999999999, 0.054)
+      Boid at (1.0, 2.002) moving (0.0, 1.002)
+      Boid at (3.003, 0.999) moving (1.003, 0.999)""" trimIndent
+]
+
+Test stepDoesNotMutate = [
+  demo = Flock demo
+  before = demo toString
+  demo step
+  Assert that: demo toString equals: before
+]
+
+Test boidIgnoresItself = [
+  b = Boid position: (Vec2 x: 0.0 y: 0.0) velocity: (Vec2 x: 1.0 y: 0.0)
+  Assert that: (b neighborsIn: {b} within: 50.0) count equals: 0
+]
+
+Test boidOnlySeesAhead = [
+  b = Boid position: (Vec2 x: 0.0 y: 0.0) velocity: (Vec2 x: 1.0 y: 0.0)
+  ahead = Boid position: (Vec2 x: 3.0 y: 0.0) velocity: (Vec2 x: 1.0 y: 0.0)
+  behind = Boid position: (Vec2 x: -3.0 y: 0.0) velocity: (Vec2 x: 1.0 y: 0.0)
+  Assert that: (b canSee: ahead) equals: true
+  Assert that: (b canSee: behind) equals: false
+]

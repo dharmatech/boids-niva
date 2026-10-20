@@ -1,0 +1,22 @@
+extend Flock [
+  /// draw the flock on a w x h canvas and write it to a PNG file
+  on saveTo(path): String screen: Screen -> Unit = [
+    w = screen width toInt
+    h = screen height toInt
+    img = BufferedImage width: w height: h
+    g = img createGraphics
+    g setColor: (Color r: 24 g: 26 b: 33)
+    g fillRectX: 0 y: 0 w: w h: h
+    boids forEach: [b ->
+      p = b position
+      tip = p + (b velocity * 4.0)
+      g setColor: (Color r: 228 g: 87 b: 46)
+      g lineX1: p x toInt y1: p y toInt x2: tip x toInt y2: tip y toInt
+      g setColor: (Color r: 242 g: 193 b: 78)
+      g fillOvalX: p x toInt - 3 y: p y toInt - 3 w: 6 h: 6
+    ]
+    g dispose
+    ImageIO write: img format: "png" to: (File path: path)
+    path echo
+  ]
+]

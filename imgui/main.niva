@@ -1,0 +1,43 @@
+// Boids rendered with Dear ImGui (imgui-java), one sim step per frame.
+// Run with ./run.sh. Esc quits.
+
+mut flock = Flock random: 150 across: (Screen width: 900.0 height: 650.0)
+
+body = ImColor rgb: "#f2c14e"
+beak = ImColor rgb: "#e4572e"
+
+app = ImGui
+  configure: [
+    it setTitle: "niva boids"
+    it setWidth: 900
+    it setHeight: 650
+  ]
+  process: [
+    io = ImGui getIO
+    flock <- flock stepOn: (Screen
+      width: io getDisplaySizeX toDouble
+      height: io getDisplaySizeY toDouble)
+
+    draw = ImGui getBackgroundDrawList
+    flock boids forEach: [b ->
+      p = b position
+      tip = p + (b velocity * 4.0)
+      draw lineX1: p x toFloat y1: p y toFloat
+           x2: tip x toFloat y2: tip y toFloat
+           color: beak thickness: 2.0f
+      draw circleX: p x toFloat y: p y toFloat radius: 3.0f color: body
+    ]
+
+    ImGui begin: "flock"
+    ImGui text: flock boids count toString + " boids"
+    ImGui text: io getFramerate toInt toString + " fps"
+    ImGui end
+
+    // the same path as a close button. Exiting the JVM with the window
+    // still open (Ctrl+C) makes NVIDIA's EGL driver segfault.
+    ImGui isKeyPressed: ImGuiKey Escape, ifTrue: [
+      GLFW setShouldClose: GLFW glfwGetCurrentContext to: true
+    ]
+  ]
+
+Application launch: app

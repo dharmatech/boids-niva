@@ -1,0 +1,49 @@
+// Screen-world rules the Aloe sim doesn't have, shared by the renderers.
+// Niva methods aren't tied to the type declaration, so these extend
+// Flock and Boid without touching sim/.
+
+type Screen width: Double height: Double
+
+/// Aloe's boids only see ahead, so cohesion keeps pulling stragglers
+/// forward and speed grows without bound (mean 1.6 -> 40 px/step over
+/// 1000 steps). Classic boids cap the speed; so do we.
+constructor Flock maxSpeed -> Double = 4.0
+
+/// a random Double in [lo, hi), two decimals
+Double randomTo(hi): Double -> Double =
+  this + ((0..<((hi - this) * 100.0) toInt) random toDouble / 100.0)
+
+/// floor-mod, so negatives wrap to the far edge (Niva's % is remainder)
+Double wrap(size): Double -> Double = (this % size + size) % size
+
+/// n boids scattered over the screen, moving in random directions
+constructor Flock random(n): Int across(screen): Screen -> Flock =
+  Flock boids: ((1..n) map: [
+    Boid
+      position: (Vec2 x: (0.0 randomTo: screen width) y: (0.0 randomTo: screen height))
+      velocity: (Vec2 x: (-2.0 randomTo: 2.0) y: (-2.0 randomTo: 2.0))
+  ])
+
+extend Boid [
+  on limitSpeed(max): Double -> Boid = [
+    s2 = velocity dot: velocity
+    ^ s2 > (max * max)
+      ifTrue: [
+        s = s2 sqrt
+        this velocity: velocity * (max / s)
+      ]
+      ifFalse: [this]
+  ]
+
+  /// leaving one edge brings the boid back on the opposite edge
+  on wrapTo(screen): Screen -> Boid =
+    this position: (Vec2
+      x: (position x wrap: screen width)
+      y: (position y wrap: screen height))
+]
+
+extend Flock [
+  /// one frame: an Aloe step, then the screen rules
+  on stepOn(screen): Screen -> Flock =
+    Flock boids: (this step boids map: [it limitSpeed: Flock maxSpeed, wrapTo: screen])
+]
