@@ -1,6 +1,6 @@
-// Expected values are what ./bin/aloe prints for examples/boids.aloe
+// Exact values for the demo's first step, so any change to the rules shows up
 
-Test firstStepMatchesAloe = [
+Test firstStepMatchesKnownValues = [
   Assert
     that: Flock demo step toString
     equals: """

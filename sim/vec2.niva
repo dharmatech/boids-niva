@@ -1,6 +1,6 @@
 /// A 2D vector of Doubles.
 /// Niva generics have no bounds (`T + T` doesn't resolve),
-/// so unlike Aloe's `(Point T)` this one is monomorphic.
+/// so it can't be generic over the number type.
 type Vec2 x: Double y: Double
 
 constructor Vec2 zero -> Vec2 = Vec2 x: 0.0 y: 0.0
