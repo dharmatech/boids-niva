@@ -61,3 +61,16 @@ Test clearViewAndBackOff = [
   climbing = b velocity: (Vec2 x: 1.0 y: 0.2)
   Assert that: (climbing stepAsideFrom: {ahead}) y > 0.0 equals: true
 ]
+
+Test resizedTo = [
+  screen = Screen width: 100.0 height: 100.0
+  demo = Flock demo
+  fewer = demo resizedTo: 2 across: screen
+  more = demo resizedTo: 5 across: screen
+  Assert that: fewer boids count equals: 2
+  Assert that: more boids count equals: 5
+  // the boids already there stay as they were
+  Assert that: fewer boids first toString equals: demo boids first toString
+  Assert that: (more boids take: 3) toString equals: demo boids toString
+  Assert that: (demo resizedTo: 3 across: screen) toString equals: demo toString
+]

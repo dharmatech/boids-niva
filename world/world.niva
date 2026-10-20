@@ -15,6 +15,9 @@ constructor Flock maxSpeed -> Double = 4.0
 /// minimum speed for this; so do we.
 constructor Flock minSpeed -> Double = 1.0
 
+/// how many boids the window starts with
+constructor Flock boidCount -> Int = 150
+
 /// a random Double in [lo, hi), two decimals
 Double randomTo(hi): Double -> Double =
   this + ((0..<((hi - this) * 100.0) toInt) random toDouble / 100.0)
@@ -68,5 +71,18 @@ extend Flock [
   on stepOn(screen): Screen minSpeed(min): Double maxSpeed(max): Double -> Flock = [
     next = this step
     ^ next boids: (next boids map: [it keepSpeedAbove: min, limitSpeed: max, wrapTo: screen])
+  ]
+
+  /// n boids: the first n of these, or all of them plus random newcomers
+  /// across the screen
+  on resizedTo(n): Int across(screen): Screen -> Flock = [
+    have = boids count
+    n == have ifTrue: [^ this]
+    ^ n < have
+      ifTrue: [this boids: (boids take: n)]
+      ifFalse: [
+        newcomers = Flock random: n - have across: screen
+        this boids: boids + newcomers boids
+      ]
   ]
 ]

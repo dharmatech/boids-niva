@@ -67,6 +67,12 @@ open them. Weights are on a log scale. **Randomize** picks new
 values, **Defaults** restores them, and **Scatter** starts a fresh
 random flock under the current rules.
 
+The **boids** slider at the top sets how many there are, from 10 to
+500, and applies at once: extras vanish and newcomers appear at random.
+The world is as big as the window, so maximizing it spreads the same
+flock thinner; raise the count to keep the density. Scatter uses the
+count too.
+
 Each button has a key, shown on it: **R**, **D** and **S**. **H** hides
 the panel and shows it again, and the keys still work while it's
 hidden, so you can watch the whole window and keep pressing R. **Esc**
@@ -142,7 +148,11 @@ otherwise brake them almost to a standstill.
     clean.
 
   It's capped at the monitor's refresh rate by vsync (30 fps on a 30 Hz
-  monitor). A step takes 0.4 ms.
+  monitor). A step takes 0.4 ms with 150 boids and the default rules.
+  The cost grows with the square of the count: with the heaviest rules
+  (both blocker rules on, a 360° view, radii of 200) it's 1.4 ms at 150
+  and 11.7 ms at 500, still inside a 60 Hz frame. That's why the boids
+  slider stops at 500.
 - **Java2D** (`png.niva`). Built into the JDK, so no dependencies or
   native libraries. Good for snapshots and tests. A live Swing window
   would need the same `@emit "object : …"` trick the ImGui binding uses,
