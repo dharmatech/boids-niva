@@ -4,6 +4,8 @@
 simulation, written in [Niva](https://github.com/gavr123456789/Niva). It
 runs in a window, headless, or as PNG snapshots.
 
+![150 boids forming flocks in the ImGui window](docs/screenshot.png)
+
 ## Getting started
 
 You need a JDK (Niva's install guide suggests 22 or 25; this was built
