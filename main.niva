@@ -1,5 +1,6 @@
 // Boids rendered with Dear ImGui (imgui-java), one sim step per frame.
-// `niva run`; Esc quits. See display.niva for BOIDS_SCALE and BOIDS_WAYLAND.
+// `niva run`. Keys: R randomize, D defaults, S scatter, H hide the panel,
+// Esc quit. See display.niva for BOIDS_SCALE and BOIDS_WAYLAND.
 
 display = Display open
 "boids: $display" echo
@@ -8,6 +9,7 @@ u = display unit
 // the sim works in logical units; only drawing is scaled
 mut flock = Flock random: 150 across: (Screen width: 900.0 height: 650.0)
 panel = RulesPanel new
+mut showPanel = true
 
 body = ImColor rgb: "#f2c14e"
 beak = ImColor rgb: "#e4572e"
@@ -40,24 +42,39 @@ app = ImGui
       draw circleX: p x toFloat * u y: p y toFloat * u radius: 3.0f * u color: body
     ]
 
-    // always fit the text; imgui.ini only keeps where you dragged it
-    ImGui begin: "flock" flags: ImGuiWindowFlags AlwaysAutoResize
-    ImGui text: flock boids count toString + " boids"
-    ImGui text: io getFramerate toInt toString + " fps"
-    ImGui separator
-    panel show
-    ImGui button: "Randomize", ifTrue: [panel randomize]
-    ImGui sameLine
-    ImGui button: "Defaults", ifTrue: [panel defaults]
-    ImGui sameLine
     // new positions and headings; the rules carry over on the next frame
-    ImGui button: "Scatter", ifTrue: [flock <- Flock random: 150 across: screen]
-    ImGui end
+    scatter = [flock <- Flock random: 150 across: screen]
 
-    // the same path as a close button. Exiting the JVM with the window
-    // still open (Ctrl+C) makes NVIDIA's EGL driver segfault on Wayland.
-    ImGui isKeyPressed: ImGuiKey Escape, ifTrue: [
-      GLFW setShouldClose: GLFW glfwGetCurrentContext to: true
+    showPanel ifTrue: [
+      // always fit the text; imgui.ini only keeps where you dragged it
+      ImGui begin: "flock" flags: ImGuiWindowFlags AlwaysAutoResize
+      ImGui text: flock boids count toString + " boids"
+      ImGui text: io getFramerate toInt toString + " fps"
+      ImGui separator
+      panel show
+      ImGui button: "Randomize (R)", ifTrue: [panel randomize]
+      ImGui sameLine
+      ImGui button: "Defaults (D)", ifTrue: [panel defaults]
+      ImGui sameLine
+      ImGui button: "Scatter (S)", ifTrue: [scatter do]
+      ImGui textDisabled: "H hides this panel, Esc quits"
+      ImGui end
+    ]
+
+    // Keys work with the panel hidden too. They're off while a slider
+    // takes typed input (Ctrl+click), so typing a value can't fire them,
+    // and Esc there cancels the edit instead of quitting.
+    io getWantTextInput ifFalse: [
+      ImGui isKeyPressed: ImGuiKey R repeat: false, ifTrue: [panel randomize]
+      ImGui isKeyPressed: ImGuiKey D repeat: false, ifTrue: [panel defaults]
+      ImGui isKeyPressed: ImGuiKey S repeat: false, ifTrue: [scatter do]
+      ImGui isKeyPressed: ImGuiKey H repeat: false, ifTrue: [showPanel <- showPanel not]
+
+      // the same path as a close button. Exiting the JVM with the window
+      // still open (Ctrl+C) makes NVIDIA's EGL driver segfault on Wayland.
+      ImGui isKeyPressed: ImGuiKey Escape, ifTrue: [
+        GLFW setShouldClose: GLFW glfwGetCurrentContext to: true
+      ]
     ]
   ]
 

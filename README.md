@@ -33,7 +33,7 @@ native libraries, so it takes a while. It has only been tried on Ubuntu
 
 | Run | What |
 |---|---|
-| `niva run` | A window drawn with Dear ImGui (imgui-java), one step per frame, with a slider for every rule. Esc quits. |
+| `niva run` | A window drawn with Dear ImGui (imgui-java), one step per frame, with a slider for every rule. Esc quits; other keys are under [Tuning the rules](#tuning-the-rules). |
 | `niva run headless.niva` | A 3-boid demo, printed after one and two steps. |
 | `niva run png.niva` | Java2D, no window: writes `frames/frame-0.png` … `frame-400.png`. |
 | `niva test` | Pins the demo's first step to exact values, plus a few rule checks. |
@@ -65,6 +65,12 @@ The window's panel has a slider for each `Rules` field and for the
 speed limits. Weights are on a log scale. **Randomize** picks new
 values, **Defaults** restores them, and **Scatter** starts a fresh
 random flock under the current rules.
+
+Each button has a key, shown on it: **R**, **D** and **S**. **H** hides
+the panel and shows it again, and the keys still work while it's
+hidden, so you can watch the whole window and keep pressing R. **Esc**
+quits. To type a slider value, Ctrl+click the slider. While you type,
+the keys are off, and Esc cancels the edit instead of quitting.
 
 Besides the three classic rules (cohesion, alignment, separation, each
 with a weight and a radius, plus the view angle), there are two that

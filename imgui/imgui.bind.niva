@@ -17,6 +17,8 @@ Bind package: "imgui" content: [
     /// end of window
     on end -> Unit
     on text: String -> Unit
+    /// text in the dimmer "disabled" color
+    on textDisabled: String -> Unit
     on separator -> Unit
     on sameLine -> Unit
     on button: String -> Bool
@@ -26,6 +28,9 @@ Bind package: "imgui" content: [
     on slider: String value: FloatArray min: Float max: Float format: String flags: Int -> Bool
 
     on isKeyPressed: Int -> Bool
+    @rename: "isKeyPressed"
+    /// repeat: false fires once per press, however long it's held
+    on isKeyPressed: Int repeat: Bool -> Bool
   ]
 
   type ImColor
@@ -39,6 +44,8 @@ Bind package: "imgui" content: [
     on getDisplaySizeX -> Float
     on getDisplaySizeY -> Float
     on getFramerate -> Float
+    /// true while a text field has focus, e.g. a Ctrl+clicked slider
+    on getWantTextInput -> Bool
     on getFonts -> ImFontAtlas
     on setFontGlobalScale: Float -> Unit
   ]
@@ -73,7 +80,7 @@ Bind package: "imgui.flag" content: [
   type ImGuiWindowFlags
   type ImGuiSliderFlags
 ] fields: [
-  ImGuiKey Escape: Int
+  ImGuiKey Escape: Int R: Int D: Int S: Int H: Int
   ImGuiWindowFlags AlwaysAutoResize: Int
   ImGuiSliderFlags Logarithmic: Int
 ]
