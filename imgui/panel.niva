@@ -21,17 +21,23 @@ extend Knob [
   on value -> Double = cell first toDouble
   on value: Double -> Unit = cell first: value toFloat
 
-  on show -> Unit = [
+  /// draws the slider; true if you moved it this frame
+  on show -> Bool = [
     flags = weight ifTrue: [ImGuiSliderFlags Logarithmic] ifFalse: [0]
-    ImGui slider: label value: cell min: min max: max format: format flags: flags
+    ^ ImGui slider: label value: cell min: min max: max format: format flags: flags
   ]
 
-  /// anywhere in the range; cubed for weights, so small ones come up
-  /// about as often as they would on the log slider
-  on randomize -> Unit = [
+  /// anywhere in the range
+  on randomize -> Unit = this randomizeFrom: min toDouble
+
+  /// anywhere from lo (or the slider's minimum, if that's higher) to the
+  /// top; cubed for weights, so small ones come up about as often as
+  /// they would on the log slider
+  on randomizeFrom(lo): Double -> Unit = [
+    bottom = lo > min toDouble ifTrue: [lo] ifFalse: [min toDouble]
     r = Random nextDouble
     t = weight ifTrue: [r * r * r] ifFalse: [r]
-    this value: min toDouble + (t * (max - min) toDouble)
+    this value: bottom + (t * (max toDouble - bottom))
   ]
 ]
 
@@ -74,13 +80,13 @@ constructor RulesPanel new -> RulesPanel = [
 ]
 
 extend RulesPanel [
-  on knobs -> List::Knob = {
+  /// the sliders for the Rules fields; the speed limits come after them
+  on ruleKnobs -> List::Knob = {
     cohesion cohesionRadius
     alignment alignmentRadius
     separation separationRadius
     viewAngle
     clearView backOff blockerRadius blockerCone
-    minSpeed maxSpeed
   }
 
   on rules -> Rules = Rules
@@ -113,7 +119,22 @@ extend RulesPanel [
     maxSpeed value: Flock maxSpeed
   ]
 
-  on randomize -> Unit = this knobs forEach: [it randomize]
+  on randomize -> Unit = [
+    this ruleKnobs forEach: [it randomize]
+    minSpeed randomize
+    // from min speed up, so the two never cross
+    maxSpeed randomizeFrom: minSpeed value
+  ]
 
-  on show -> Unit = this knobs forEach: [it show]
+  on show -> Unit = [
+    this ruleKnobs forEach: [it show]
+    minSpeed show
+    fasterMoved = maxSpeed show
+    // min speed can't pass max speed: the one you drag pushes the other
+    minSpeed value > maxSpeed value ifTrue: [
+      fasterMoved
+        ifTrue: [minSpeed value: maxSpeed value]
+        ifFalse: [maxSpeed value: minSpeed value]
+    ]
+  ]
 ]

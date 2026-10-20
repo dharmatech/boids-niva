@@ -65,7 +65,9 @@ The window's panel has a slider for each `Rules` field and for the
 speed limits, under a **rules** header that starts folded; click it to
 open them. Weights are on a log scale. **Randomize** picks new
 values, **Defaults** restores them, and **Scatter** starts a fresh
-random flock under the current rules.
+random flock under the current rules. Min and max speed can't cross:
+Randomize picks max speed from above min speed, and dragging one past
+the other pushes the other along.
 
 The **boids** slider at the top sets how many there are, from 10 to
 500, and applies at once: extras vanish and newcomers appear at random.

@@ -74,3 +74,11 @@ Test resizedTo = [
   Assert that: (more boids take: 3) toString equals: demo boids toString
   Assert that: (demo resizedTo: 3 across: screen) toString equals: demo toString
 ]
+
+Test randomizeKeepsSpeedsInOrder = [
+  panel = RulesPanel new
+  1 to: 500 do: [
+    panel randomize
+    Assert that: panel minSpeed value <= panel maxSpeed value equals: true
+  ]
+]
