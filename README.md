@@ -120,6 +120,10 @@ instead. `sim/` leaves the rules as they are, and `world/` caps speed at
   the block's value. On Niva's own types, which are immutable, they do
   nothing: `p x: 10; y: 20` makes two copies and returns `p`. The
   `recv; msg` form in some older examples no longer parses.
+- **Compiler bug:** a cascade of a type's own messages, such as
+  `ImGui begin: "flock"; text: "…"; end`, passes Niva's checker but
+  generates broken Kotlin (`ImGui.also { … }`). Cascades only work on
+  objects.
 - Generics have no bounds, so `T + T` doesn't resolve. That's why `Vec2`
   is Doubles only.
 - `"${a b}"` is passed to Kotlin unchanged, so only `$name` interpolation
@@ -130,7 +134,8 @@ instead. `sim/` leaves the rules as they are, and `world/` caps speed at
   `world/math.bind.niva` binds Kotlin's.
 - **Compiler bug:** a bound `@emit` unary used as a binary operand
   (`1.0 + x sqrt`) generates broken Kotlin. Assign it to a name first.
-- `niva run` exits 0 even when the Kotlin build fails.
+- `niva run` and `niva build` exit 0 even when the Kotlin build fails,
+  and `niva build` then leaves the previous build's jar as `main.jar`.
 - `///` doc comments can't go on a type's fields (syntax error), and
   must sit right before `on`, after any `@rename`/`@emit` pragma.
 
