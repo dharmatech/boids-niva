@@ -1,5 +1,5 @@
 // `niva run headless.niva`: the 3-boid demo from Aloe's examples/boids.aloe
-// (~/journal/2026-09-02-aloe-racket), printed after one and two steps.
+// (https://github.com/dharmatech/2026-09-02-aloe-racket), printed after one and two steps.
 
 demo = Flock demo
 

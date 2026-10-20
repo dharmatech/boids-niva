@@ -1,8 +1,36 @@
 # Boids in Niva
 
-An idiomatic Niva port of Aloe's
-[examples/boids.aloe](../../2026-09-02-aloe-racket/examples/boids.aloe),
-plus two renderers.
+An idiomatic [Niva](https://github.com/gavr123456789/Niva) port of the
+Boids example from
+[Aloe](https://github.com/dharmatech/2026-09-02-aloe-racket),
+a small Scheme-like language built on message sends
+(`(receiver selector arg …)`), plus two renderers. The original is
+[examples/boids.aloe](https://github.com/dharmatech/2026-09-02-aloe-racket/blob/main/examples/boids.aloe).
+
+## Getting started
+
+You need a JDK (Niva's install guide suggests 22 or 25; this was built
+with OpenJDK 25) and the Niva compiler:
+
+```bash
+git clone https://github.com/gavr123456789/Niva.git
+cd Niva/Niva/Niva
+./gradlew buildJvmNiva
+```
+
+That installs `niva` in `~/.niva/niva/bin`. Add that to your `PATH`
+([Niva's INSTALL.md](https://github.com/gavr123456789/Niva/blob/main/INSTALL.md)
+has a line for each shell). Then, in this repo, `niva run`.
+
+Niva is changing quickly. This was tested with Niva commit `402e02a6`
+(2026-10-20). If a newer Niva won't compile it, run
+`git checkout 402e02a6` in your Niva clone and build again.
+
+The first run downloads Gradle dependencies, including imgui-java and its
+native libraries, so it takes a while. It has only been tried on Ubuntu
+(GNOME on Wayland, NVIDIA).
+
+## Running
 
 | Run | What |
 |---|---|
@@ -108,3 +136,8 @@ is what classic boids do.
 - `niva run` exits 0 even when the Kotlin build fails.
 - `///` doc comments can't go on a type's fields (syntax error), and
   must sit right before `on`, after any `@rename`/`@emit` pragma.
+
+## License
+
+MIT; see [LICENSE](LICENSE). `imgui/imgui.bind.niva` is adapted from gavr's
+[bazar](https://github.com/gavr123456789/bazar), also MIT.

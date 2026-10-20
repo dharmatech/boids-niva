@@ -1,5 +1,6 @@
 // Just the slice of imgui-java the renderer needs.
 // Adapted from gavr's bazar: Programs/imgui-demo/imgui.bind.niva
+// (MIT License, Copyright (c) 2024 gavr; see LICENSE)
 
 Project loadPackages: {"io.github.spair:imgui-java-app:1.90.0"}
 
