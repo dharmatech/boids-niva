@@ -35,7 +35,7 @@ extend Knob [
   ]
 ]
 
-/// A slider for each Rules field, plus the speed cap from world/.
+/// A slider for each Rules field, plus the speed limits from world/.
 type RulesPanel
   cohesion: Knob
   cohesionRadius: Knob
@@ -44,11 +44,17 @@ type RulesPanel
   separation: Knob
   separationRadius: Knob
   viewAngle: Knob
+  clearView: Knob
+  backOff: Knob
+  blockerRadius: Knob
+  blockerCone: Knob
+  minSpeed: Knob
   maxSpeed: Knob
 
 constructor RulesPanel new -> RulesPanel = [
   // copy-with (`k format: …`) needs a variable as its receiver
-  speed = Knob range: "max speed" from: 0.5f to: 10.0f
+  slowest = Knob range: "min speed" from: 0.0f to: 5.0f
+  fastest = Knob range: "max speed" from: 0.5f to: 10.0f
   panel = RulesPanel
     cohesion: (Knob weight: "cohesion" upTo: 0.2f)
     cohesionRadius: (Knob range: "cohesion radius" from: 0.0f to: 200.0f)
@@ -57,7 +63,12 @@ constructor RulesPanel new -> RulesPanel = [
     separation: (Knob weight: "separation" upTo: 1.0f)
     separationRadius: (Knob range: "separation radius" from: 0.0f to: 50.0f)
     viewAngle: (Knob range: "view angle (deg)" from: 0.0f to: 360.0f)
-    maxSpeed: (speed format: "%.1f")
+    clearView: (Knob weight: "clear view" upTo: 1.0f)
+    backOff: (Knob weight: "back off" upTo: 1.0f)
+    blockerRadius: (Knob range: "blocker radius" from: 0.0f to: 100.0f)
+    blockerCone: (Knob range: "blocker cone (deg)" from: 0.0f to: 180.0f)
+    minSpeed: (slowest format: "%.1f")
+    maxSpeed: (fastest format: "%.1f")
   panel defaults
   ^ panel
 ]
@@ -67,7 +78,9 @@ extend RulesPanel [
     cohesion cohesionRadius
     alignment alignmentRadius
     separation separationRadius
-    viewAngle maxSpeed
+    viewAngle
+    clearView backOff blockerRadius blockerCone
+    minSpeed maxSpeed
   }
 
   on rules -> Rules = Rules
@@ -78,6 +91,10 @@ extend RulesPanel [
     separation: separation value
     separationRadius: separationRadius value
     viewAngle: viewAngle value
+    clearView: clearView value
+    backOff: backOff value
+    blockerRadius: blockerRadius value
+    blockerCone: blockerCone value
 
   on defaults -> Unit = [
     r = Rules default
@@ -88,6 +105,11 @@ extend RulesPanel [
     separation value: r separation
     separationRadius value: r separationRadius
     viewAngle value: r viewAngle
+    clearView value: r clearView
+    backOff value: r backOff
+    blockerRadius value: r blockerRadius
+    blockerCone value: r blockerCone
+    minSpeed value: Flock minSpeed
     maxSpeed value: Flock maxSpeed
   ]
 

@@ -44,6 +44,27 @@ extend Boid [
         ifFalse: [sum]
     ]
 
+  /// a unit step sideways out from behind each blocker: square to the
+  /// line between us, on the side we're heading
+  on stepAsideFrom(blockers): List::Boid -> Vec2 =
+    blockers inject: Vec2 zero into: [sum, other ->
+      away = position - other position
+      d = (away dot: away) sqrt
+      quarterTurn = Vec2 x: 0.0 - away y y: away x
+      side = (velocity dot: quarterTurn) < 0.0
+        ifTrue: [quarterTurn * -1.0]
+        ifFalse: [quarterTurn]
+      sum + (side / d)
+    ]
+
+  /// a unit step straight away from each blocker
+  on backOffFrom(blockers): List::Boid -> Vec2 =
+    blockers inject: Vec2 zero into: [sum, other ->
+      away = position - other position
+      d = (away dot: away) sqrt
+      sum + (away / d)
+    ]
+
   on advance(newVelocity): Vec2 -> Boid =
     Boid position: position + newVelocity velocity: newVelocity
 

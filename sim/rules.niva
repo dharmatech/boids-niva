@@ -2,6 +2,13 @@
 /// steers) and a radius (how far a boid looks for it). viewAngle is the
 /// field of view in degrees, centered on the heading: 180 sees only ahead,
 /// 360 sees all around. Separation ignores it; you feel a bump from behind.
+///
+/// Clear view and back off split the fourth rule from Gary William
+/// Flake's "The Computational Beauty of Nature" (1998). Both react to
+/// blockers, boids closer than blockerRadius inside a cone straight
+/// ahead, blockerCone degrees wide. Clear view steps sideways out from
+/// behind them; back off steps away from them. Flake's rule is mostly
+/// back off with a little clear view. Both are off (weight 0) by default.
 type Rules
   cohesion: Double
   cohesionRadius: Double
@@ -10,8 +17,13 @@ type Rules
   separation: Double
   separationRadius: Double
   viewAngle: Double
+  clearView: Double
+  backOff: Double
+  blockerRadius: Double
+  blockerCone: Double
 
-/// the original settings: see only ahead, barely any separation
+/// the original settings: see only ahead, barely any separation, and
+/// the blocker rules off (the blocker radius and cone are Flake's)
 constructor Rules default -> Rules = Rules
   cohesion: 0.01
   cohesionRadius: 50.0
@@ -20,3 +32,7 @@ constructor Rules default -> Rules = Rules
   separation: 0.001
   separationRadius: 5.0
   viewAngle: 180.0
+  clearView: 0.0
+  backOff: 0.0
+  blockerRadius: 40.0
+  blockerCone: 90.0

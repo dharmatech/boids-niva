@@ -25,7 +25,10 @@ app = ImGui
     screen = Screen
       width: (io getDisplaySizeX / u) toDouble
       height: (io getDisplaySizeY / u) toDouble
-    flock <- (flock rules: panel rules) stepOn: screen maxSpeed: panel maxSpeed value
+    flock <- (flock rules: panel rules)
+      stepOn: screen
+      minSpeed: panel minSpeed value
+      maxSpeed: panel maxSpeed value
 
     draw = ImGui getBackgroundDrawList
     flock boids forEach: [b ->

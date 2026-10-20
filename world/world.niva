@@ -10,6 +10,11 @@ type Screen width: Double height: Double
 /// default; the window has a slider for it.
 constructor Flock maxSpeed -> Double = 4.0
 
+/// Back off pushes boids away from whoever is ahead, and with nothing to
+/// stop that they brake almost to a standstill. Flake's boids have a
+/// minimum speed for this; so do we.
+constructor Flock minSpeed -> Double = 1.0
+
 /// a random Double in [lo, hi), two decimals
 Double randomTo(hi): Double -> Double =
   this + ((0..<((hi - this) * 100.0) toInt) random toDouble / 100.0)
@@ -27,6 +32,17 @@ constructor Flock random(n): Int across(screen): Screen -> Flock = Flock
   rules: Rules default
 
 extend Boid [
+  /// at least lo (a boid standing still has no heading, so it stays put)
+  on keepSpeedAbove(lo): Double -> Boid = [
+    s2 = velocity dot: velocity
+    ^ (s2 > 0.0) && (s2 < (lo * lo))
+      ifTrue: [
+        s = s2 sqrt
+        this velocity: velocity * (lo / s)
+      ]
+      ifFalse: [this]
+  ]
+
   on limitSpeed(max): Double -> Boid = [
     s2 = velocity dot: velocity
     ^ s2 > (max * max)
@@ -46,10 +62,11 @@ extend Boid [
 
 extend Flock [
   /// one frame: a sim step, then the screen rules
-  on stepOn(screen): Screen -> Flock = this stepOn: screen maxSpeed: Flock maxSpeed
+  on stepOn(screen): Screen -> Flock =
+    this stepOn: screen minSpeed: Flock minSpeed maxSpeed: Flock maxSpeed
 
-  on stepOn(screen): Screen maxSpeed(max): Double -> Flock = [
+  on stepOn(screen): Screen minSpeed(min): Double maxSpeed(max): Double -> Flock = [
     next = this step
-    ^ next boids: (next boids map: [it limitSpeed: max, wrapTo: screen])
+    ^ next boids: (next boids map: [it keepSpeedAbove: min, limitSpeed: max, wrapTo: screen])
   ]
 ]

@@ -20,7 +20,15 @@ extend Flock [
     toCenter = b cohere: (b neighborsIn: boids within: rules cohesionRadius fov: fov)
     toHeading = b align: (b neighborsIn: boids within: rules alignmentRadius fov: fov)
     away = b separateFrom: boids within: rules separationRadius
-    ^ b advance: b velocity + (toCenter * rules cohesion) + (toHeading * rules alignment) + (away * rules separation)
+    // blockers are in a cone ahead; a boid can't react to what it can't see
+    cone = rules blockerCone < fov ifTrue: [rules blockerCone] ifFalse: [fov]
+    aside = rules clearView == 0.0
+      ifTrue: [Vec2 zero]
+      ifFalse: [b stepAsideFrom: (b neighborsIn: boids within: rules blockerRadius fov: cone)]
+    back = rules backOff == 0.0
+      ifTrue: [Vec2 zero]
+      ifFalse: [b backOffFrom: (b neighborsIn: boids within: rules blockerRadius fov: cone)]
+    ^ b advance: b velocity + (toCenter * rules cohesion) + (toHeading * rules alignment) + (away * rules separation) + (aside * rules clearView) + (back * rules backOff)
   ]
 
   on toString -> String = boids joinWith: "\n"

@@ -46,7 +46,7 @@ sharing the rest:
 | Folder | What |
 |---|---|
 | `sim/` | The simulation: `Vec2`, `Boid`, `Flock`, and the `Rules` they follow. |
-| `world/` | Rules only the renderers need: `Screen`, random flocks, edge wrapping, a speed cap. |
+| `world/` | Rules only the renderers need: `Screen`, random flocks, edge wrapping, speed limits. |
 | `imgui/` | ImGui bindings, `display.niva` (X11 or Wayland, and the scale), and `panel.niva` (the sliders). |
 | `java2d/` | Java2D bindings, and `Flock saveTo:` for snapshots. |
 | `tests/` | `niva test`. |
@@ -61,18 +61,42 @@ built jar does get them, as `Compiler cliArgs`.
 
 ## Tuning the rules
 
-The window's panel has a slider for each `Rules` field (weight and radius
-for cohesion, alignment and separation, plus the view angle) and for the
-speed cap. Weights are on a log scale. **Randomize** picks new values,
-**Defaults** restores them, and **Scatter** starts a fresh random flock
-under the current rules.
+The window's panel has a slider for each `Rules` field and for the
+speed limits. Weights are on a log scale. **Randomize** picks new
+values, **Defaults** restores them, and **Scatter** starts a fresh
+random flock under the current rules.
 
-The defaults make the boids end up in single file. Two changes give
-broad, evenly spaced flocks instead: widen the view angle to about 270°,
-and make separation real (about 0.05 within 15). With the wider view but
-the default separation, they collapse into tight clumps.
+Besides the three classic rules (cohesion, alignment, separation, each
+with a weight and a radius, plus the view angle), there are two that
+react to *blockers*: boids within `blocker radius` and inside a cone
+`blocker cone` degrees wide, straight ahead.
 
-## Why `world/` caps the speed
+- **Clear view** steps sideways out from behind each blocker, toward
+  the side the boid is already heading.
+- **Back off** steps straight away from each blocker.
+
+They come from Gary William Flake's *The Computational Beauty of Nature*
+(MIT Press, 1998), whose boids add a fourth rule to Reynolds' three:
+keep a clear view ahead. His version is one push, mostly back off with a
+little clear view (the sideways part shrinks with distance), and his
+defaults are a 40 radius and a 90° cone. Here they're separate sliders,
+both off by default. The code is written from his description, not
+copied from his (GPL) source.
+
+Some starting points, all from one random flock after 1500 steps:
+
+- The defaults end up in single file.
+- View angle 270° and separation 0.05 within 15 give broad, evenly
+  spaced flocks. With the wider view but default separation, they
+  collapse into tight clumps.
+- Add clear view 0.2: staggered diagonal ranks, like ducks and geese in
+  echelon. No V shapes so far.
+- With back off 0.2 instead, they brake: they slow to the minimum speed
+  and drift in round blobs. With no minimum they nearly stop (mean speed
+  0.26).
+- Clear view 0.2 with back off 0.05: wide side-by-side ranks.
+
+## Why `world/` limits the speed
 
 With the default rules, the boids only see neighbors ahead of them
 (`viewAngle` 180). Cohesion therefore pulls stragglers forward, and
@@ -80,7 +104,9 @@ nothing pulls the leaders back. With 150 random boids, mean speed goes
 from 1.6 to 40 px/step over 1000 steps and keeps climbing. With
 all-around vision it decays to 0.3 instead. `sim/` leaves the rules as
 they are, and `world/` caps speed at 4 by default (`Flock maxSpeed`),
-which is what classic boids do.
+which is what classic boids do. It also keeps speed above 1
+(`Flock minSpeed`), as Flake's boids do, because back off would
+otherwise brake them almost to a standstill.
 
 ## Graphics options
 

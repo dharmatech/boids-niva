@@ -38,3 +38,26 @@ Test viewAngle = [
   Assert that: (b canSee: behind fov: 360.0) equals: true
   Assert that: (b canSee: ahead fov: 10.0) equals: true
 ]
+
+Test blockersAreCloseAndAhead = [
+  // heading right; only the boid close and straight ahead blocks
+  b = Boid position: (Vec2 x: 0.0 y: 0.0) velocity: (Vec2 x: 1.0 y: 0.0)
+  ahead = Boid position: (Vec2 x: 10.0 y: 0.0) velocity: (Vec2 x: 1.0 y: 0.0)
+  side = Boid position: (Vec2 x: 0.0 y: 10.0) velocity: (Vec2 x: 1.0 y: 0.0)
+  behind = Boid position: (Vec2 x: -10.0 y: 0.0) velocity: (Vec2 x: 1.0 y: 0.0)
+  far = Boid position: (Vec2 x: 50.0 y: 0.0) velocity: (Vec2 x: 1.0 y: 0.0)
+  blockers = b neighborsIn: {b ahead side behind far} within: 40.0 fov: 90.0
+  Assert that: blockers count equals: 1
+]
+
+Test clearViewAndBackOff = [
+  b = Boid position: (Vec2 x: 0.0 y: 0.0) velocity: (Vec2 x: 1.0 y: 0.0)
+  ahead = Boid position: (Vec2 x: 10.0 y: 0.0) velocity: (Vec2 x: 1.0 y: 0.0)
+  // one unit sideways, and one unit back
+  Assert that: (b stepAsideFrom: {ahead}) toString equals: "(0.0, -1.0)"
+  Assert that: (b backOffFrom: {ahead}) toString equals: "(-1.0, 0.0)"
+
+  // heading a little upward, the sideways step goes up too
+  climbing = b velocity: (Vec2 x: 1.0 y: 0.2)
+  Assert that: (climbing stepAsideFrom: {ahead}) y > 0.0 equals: true
+]
