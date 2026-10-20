@@ -8,9 +8,11 @@ Bind package: "imgui" content: [
   constructor ImGui [
     on getBackgroundDrawList -> ImDrawList
     on getIO -> ImGuiIO
+    on getStyle -> ImGuiStyle
 
+    @rename: "begin"
     /// create window
-    on begin: String -> Bool
+    on begin: String flags: Int -> Bool
     /// end of window
     on end -> Unit
     on text: String -> Unit
@@ -29,6 +31,24 @@ Bind package: "imgui" content: [
     on getDisplaySizeX -> Float
     on getDisplaySizeY -> Float
     on getFramerate -> Float
+    on getFonts -> ImFontAtlas
+    on setFontGlobalScale: Float -> Unit
+  ]
+
+  type ImGuiStyle
+  extend ImGuiStyle [
+    on scaleAllSizes: Float -> Unit
+  ]
+
+  type ImFont
+  type ImFontConfig
+  extend ImFontConfig [
+    on setSizePixels: Float -> Unit
+  ]
+
+  type ImFontAtlas
+  extend ImFontAtlas [
+    on addFontDefault: ImFontConfig -> ImFont
   ]
 
   type ImDrawList
@@ -42,17 +62,42 @@ Bind package: "imgui" content: [
 
 Bind package: "imgui.flag" content: [
   type ImGuiKey
+  type ImGuiWindowFlags
 ] fields: [
   ImGuiKey Escape: Int
+  ImGuiWindowFlags AlwaysAutoResize: Int
 ]
 
 Bind package: "org.lwjgl.glfw" content: [
   type GLFW
   constructor GLFW [
+    @rename: "glfwInitHint"
+    on initHint: Int value: Int -> Unit
+    @rename: "glfwInit"
+    /// imgui-java calls this again later; a second call is a no-op
+    on initialize -> Bool
+
+    @emit: """run {
+      val x = FloatArray(1); val y = FloatArray(1)
+      org.lwjgl.glfw.GLFW.glfwGetMonitorContentScale(org.lwjgl.glfw.GLFW.glfwGetPrimaryMonitor(), x, y)
+      x[0]
+    }"""
+    /// the desktop's scale: Xft.dpi / 96 on X11, the output scale on Wayland
+    on primaryMonitorScale -> Float
+
     /// the window whose GL context is current, i.e. ours
     on glfwGetCurrentContext -> Long
     @rename: "glfwSetWindowShouldClose"
     on setShouldClose: Long to: Bool -> Unit
+  ]
+] fields: [
+  GLFW GLFW_PLATFORM: Int GLFW_PLATFORM_X11: Int GLFW_PLATFORM_WAYLAND: Int
+]
+
+Bind package: "java.lang" content: [
+  type System
+  constructor System [
+    on getenv: String -> String?
   ]
 ]
 
@@ -64,13 +109,16 @@ Bind package: "imgui.app" content: [
     on setHeight: Int -> Unit
   ]
 
+  // setup runs once ImGui exists but before its font atlas is built,
+  // so it's where fonts and style go
   @emit: """
   object : Application() {
         override fun configure(it: Configuration) = $1()
-        override fun process() $2
+        override fun initImGui(config: Configuration) { super.initImGui(config); $2() }
+        override fun process() $3
     }
   """
-  constructor ImGui configure: [Configuration ->] process: [-> Unit] -> ImGui
+  constructor ImGui configure: [Configuration ->] setup: [-> Unit] process: [-> Unit] -> ImGui
 
   type Application
   constructor Application launch: ImGui -> Unit

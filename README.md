@@ -9,7 +9,7 @@ plus two renderers.
 | `sim/` | The port itself: `Vec2`, `Boid`, `Flock`. No `main.niva`; it's shared code. | — |
 | `headless/` | Aloe's 3-boid demo, printed. Tests pin step 1 to Aloe's exact output. | `niva run`, `niva test` |
 | `world/` | Rules that only the renderers need: `Screen`, random flocks, edge wrapping, a speed cap. | — |
-| `imgui/` | A window drawn with Dear ImGui (imgui-java), one step per frame. Esc quits. | `./run.sh` |
+| `imgui/` | A window drawn with Dear ImGui (imgui-java), one step per frame. Esc quits. | `niva run` |
 | `png/` | Java2D, no window: writes `frame-0.png` … `frame-400.png`. | `niva run` |
 
 Niva builds every `.niva` file under the folder that holds `main.niva`, and
@@ -44,21 +44,28 @@ is what classic boids do.
   ImGui programs, and the generated Gradle build has an ImGui fix for
   macOS. Immediate mode suits one-step-per-frame, and it comes with
   sliders and buttons for tuning the rules live.
-  On this machine (one 4K monitor at scale 2, with GNOME's
-  `xwayland-native-scaling`):
-  - Under XWayland, GLFW ignores `Xft.dpi: 192`, so the window comes out
-    half size. Native Wayland gets the 2x scale right (framebuffer scale
-    2.0). The ImGui font is drawn at 1x and stretched, so it's a bit soft.
-  - On Wayland there's no title bar. GNOME leaves title bars to the app,
-    and GLFW hands that to libdecor. Since libdecor 0.2.3 (May 2025), its
-    GTK plugin won't run off the process's first thread, because GTK isn't
-    thread-safe. The JVM never runs `main` there. The cairo plugin has no
-    such check (`sudo apt install libdecor-0-plugin-1-cairo`).
-  - Exiting the JVM with the window open (Ctrl+C, kill, `exitProcess`)
-    segfaults in NVIDIA's EGL driver and leaves an `hs_err_pid*.log`. A
-    normal close (Esc, Alt+F4) is clean.
-  - The monitor runs at 29.96 Hz and ImGui waits for vsync, hence 29 fps.
-    A step takes 0.4 ms.
+
+  The window uses X11 (XWayland on a Wayland desktop), so the desktop
+  draws its usual title bar. It scales itself the way GTK and Qt do,
+  from `Xft.dpi` (on GNOME: monitor scale rounded up, times the Large
+  Text factor), and `BOIDS_SCALE=1.5` overrides that. The sim stays in
+  unscaled units; only drawing is scaled.
+
+  `BOIDS_WAYLAND=1` runs it on native Wayland instead. That works and
+  scales correctly, but on GNOME:
+  - There's no title bar. GNOME leaves title bars to the app, and GLFW
+    hands that to libdecor. Since libdecor 0.2.3 (May 2025), its GTK
+    plugin won't run off the process's first thread, because GTK isn't
+    thread-safe, and the JVM never runs `main` there. The cairo plugin has
+    no such check (`sudo apt install libdecor-0-plugin-1-cairo`).
+  - Every launch prints a `GLFW_FEATURE_UNAVAILABLE` stack trace
+    (imgui-java tries to center the window, which Wayland doesn't allow).
+  - With NVIDIA, exiting the JVM with the window open (Ctrl+C) segfaults
+    in the EGL driver and leaves an `hs_err_pid*.log`. Esc or Alt+F4 is
+    clean.
+
+  It's capped at the monitor's refresh rate by vsync (30 fps on a 30 Hz
+  monitor). A step takes 0.4 ms.
 - **Java2D** (used in `png/`). Built into the JDK, so no dependencies or
   native libraries. Good for snapshots and tests. A live Swing window
   would need the same `@emit "object : …"` trick the ImGui binding uses,
@@ -87,3 +94,5 @@ is what classic boids do.
 - **Compiler bug:** a bound `@emit` unary used as a binary operand
   (`1.0 + x sqrt`) generates broken Kotlin. Assign it to a name first.
 - `niva run` exits 0 even when the Kotlin build fails.
+- `///` doc comments can't go on a type's fields (syntax error), and
+  must sit right before `on`, after any `@rename`/`@emit` pragma.

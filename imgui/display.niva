@@ -1,0 +1,47 @@
+// Which windowing system to use, and how big to draw.
+//
+// X11 by default (XWayland on a Wayland desktop): GNOME draws a normal
+// title bar, which it won't do for a JVM app on native Wayland.
+// BOIDS_WAYLAND=1 opts into native Wayland.
+//
+// The scale comes from the desktop (Xft.dpi on X11, the output scale on
+// Wayland), like GTK and Qt. BOIDS_SCALE=1.5 overrides it.
+
+// scale: screen pixels per logical unit.
+// unit: window coordinates per logical unit. X11 coordinates are pixels,
+// so it's `scale`; Wayland coordinates are already scaled by the desktop.
+type Display
+  wayland: Bool
+  scale: Float
+  unit: Float
+
+constructor Display open -> Display = [
+  wayland = (System getenv: "BOIDS_WAYLAND") == "1"
+  GLFW initHint: GLFW GLFW_PLATFORM
+       value: (wayland ifTrue: [GLFW GLFW_PLATFORM_WAYLAND] ifFalse: [GLFW GLFW_PLATFORM_X11])
+  GLFW initialize
+
+  desktop = GLFW primaryMonitorScale
+  scale = (System getenv: "BOIDS_SCALE") unpack: [it toFloat] or: desktop
+  ^ Display
+    wayland: wayland
+    scale: scale
+    unit: (wayland ifTrue: [scale / desktop] ifFalse: [scale])
+]
+
+extend Display [
+  /// ImGui's built-in font, rasterized at full resolution so it stays crisp
+  on setUpImGui -> Unit = [
+    font = ImFontConfig new
+    font setSizePixels: 13.0f * scale
+    io = ImGui getIO
+    io getFonts addFontDefault: font
+    io setFontGlobalScale: unit / scale
+    ImGui getStyle scaleAllSizes: unit
+  ]
+
+  on toString -> String = [
+    platform = wayland ifTrue: ["Wayland"] ifFalse: ["X11"]
+    ^ platform + ", scale " + scale toString + ", unit " + unit toString
+  ]
+]
