@@ -13,9 +13,10 @@ beak = ImColor rgb: "#e4572e"
 
 app = ImGui
   configure: [
-    it setTitle: "niva boids"
-    it setWidth: (900.0f * u) toInt
-    it setHeight: (650.0f * u) toInt
+    it
+      setTitle: "niva boids";
+      setWidth: (900.0f * u) toInt;
+      setHeight: (650.0f * u) toInt
   ]
   setup: [display setUpImGui]
   process: [

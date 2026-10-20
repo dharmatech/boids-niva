@@ -115,6 +115,11 @@ instead. `sim/` leaves the rules as they are, and `world/` caps speed at
 - A method needs an explicit `-> Type` to be callable from files that
   compile before it (files go in name order).
 - `on:` can't be a keyword, because `on` starts method declarations.
+- Cascades (`it setTitle: "…"; setWidth: 900`) return the receiver, not
+  the last result, so a cascade at the end of a block makes the receiver
+  the block's value. On Niva's own types, which are immutable, they do
+  nothing: `p x: 10; y: 20` makes two copies and returns `p`. The
+  `recv; msg` form in some older examples no longer parses.
 - Generics have no bounds, so `T + T` doesn't resolve. That's why `Vec2`
   is Doubles only.
 - `"${a b}"` is passed to Kotlin unchanged, so only `$name` interpolation

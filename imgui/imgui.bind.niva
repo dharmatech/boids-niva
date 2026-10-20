@@ -114,7 +114,7 @@ Bind package: "imgui.app" content: [
   // so it's where fonts and style go
   @emit: """
   object : Application() {
-        override fun configure(it: Configuration) = $1()
+        override fun configure(it: Configuration) { $1() }
         override fun initImGui(config: Configuration) { super.initImGui(config); $2() }
         override fun process() $3
     }
