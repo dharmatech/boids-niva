@@ -1,0 +1,22 @@
+/// The flocking rules' settings. Each rule has a weight (how hard it
+/// steers) and a radius (how far a boid looks for it). viewAngle is the
+/// field of view in degrees, centered on the heading: 180 sees only ahead,
+/// 360 sees all around. Separation ignores it; you feel a bump from behind.
+type Rules
+  cohesion: Double
+  cohesionRadius: Double
+  alignment: Double
+  alignmentRadius: Double
+  separation: Double
+  separationRadius: Double
+  viewAngle: Double
+
+/// the original settings: see only ahead, barely any separation
+constructor Rules default -> Rules = Rules
+  cohesion: 0.01
+  cohesionRadius: 50.0
+  alignment: 0.05
+  alignmentRadius: 50.0
+  separation: 0.001
+  separationRadius: 5.0
+  viewAngle: 180.0

@@ -6,7 +6,8 @@ type Screen width: Double height: Double
 
 /// The sim's boids only see ahead, so cohesion keeps pulling stragglers
 /// forward and speed grows without bound (mean 1.6 -> 40 px/step over
-/// 1000 steps). Classic boids cap the speed; so do we.
+/// 1000 steps). Classic boids cap the speed; so do we. This is the
+/// default; the window has a slider for it.
 constructor Flock maxSpeed -> Double = 4.0
 
 /// a random Double in [lo, hi), two decimals
@@ -17,12 +18,13 @@ Double randomTo(hi): Double -> Double =
 Double wrap(size): Double -> Double = (this % size + size) % size
 
 /// n boids scattered over the screen, moving in random directions
-constructor Flock random(n): Int across(screen): Screen -> Flock =
-  Flock boids: ((1..n) map: [
+constructor Flock random(n): Int across(screen): Screen -> Flock = Flock
+  boids: ((1..n) map: [
     Boid
       position: (Vec2 x: (0.0 randomTo: screen width) y: (0.0 randomTo: screen height))
       velocity: (Vec2 x: (-2.0 randomTo: 2.0) y: (-2.0 randomTo: 2.0))
   ])
+  rules: Rules default
 
 extend Boid [
   on limitSpeed(max): Double -> Boid = [
@@ -44,6 +46,10 @@ extend Boid [
 
 extend Flock [
   /// one frame: a sim step, then the screen rules
-  on stepOn(screen): Screen -> Flock =
-    Flock boids: (this step boids map: [it limitSpeed: Flock maxSpeed, wrapTo: screen])
+  on stepOn(screen): Screen -> Flock = this stepOn: screen maxSpeed: Flock maxSpeed
+
+  on stepOn(screen): Screen maxSpeed(max): Double -> Flock = [
+    next = this step
+    ^ next boids: (next boids map: [it limitSpeed: max, wrapTo: screen])
+  ]
 ]

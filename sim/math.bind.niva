@@ -1,0 +1,12 @@
+// Niva's std has no sqrt or cos. Note: `a + x sqrt` miscompiles (the @emit
+// is dropped when it's a binary operand), so bind the result to a name first.
+Bind package: "kotlin.math" content: [
+  extend Double [
+    @emit: "kotlin.math.sqrt($0)"
+    on sqrt -> Double
+    @emit: "kotlin.math.cos($0)"
+    on cos -> Double
+  ]
+]
+
+constructor Double pi -> Double = 3.141592653589793

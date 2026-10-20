@@ -7,6 +7,7 @@ u = display unit
 
 // the sim works in logical units; only drawing is scaled
 mut flock = Flock random: 150 across: (Screen width: 900.0 height: 650.0)
+panel = RulesPanel new
 
 body = ImColor rgb: "#f2c14e"
 beak = ImColor rgb: "#e4572e"
@@ -21,9 +22,10 @@ app = ImGui
   setup: [display setUpImGui]
   process: [
     io = ImGui getIO
-    flock <- flock stepOn: (Screen
+    screen = Screen
       width: (io getDisplaySizeX / u) toDouble
-      height: (io getDisplaySizeY / u) toDouble)
+      height: (io getDisplaySizeY / u) toDouble
+    flock <- (flock rules: panel rules) stepOn: screen maxSpeed: panel maxSpeed value
 
     draw = ImGui getBackgroundDrawList
     flock boids forEach: [b ->
@@ -39,6 +41,14 @@ app = ImGui
     ImGui begin: "flock" flags: ImGuiWindowFlags AlwaysAutoResize
     ImGui text: flock boids count toString + " boids"
     ImGui text: io getFramerate toInt toString + " fps"
+    ImGui separator
+    panel show
+    ImGui button: "Randomize", ifTrue: [panel randomize]
+    ImGui sameLine
+    ImGui button: "Defaults", ifTrue: [panel defaults]
+    ImGui sameLine
+    // new positions and headings; the rules carry over on the next frame
+    ImGui button: "Scatter", ifTrue: [flock <- Flock random: 150 across: screen]
     ImGui end
 
     // the same path as a close button. Exiting the JVM with the window

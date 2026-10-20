@@ -18,13 +18,23 @@ Test stepDoesNotMutate = [
 
 Test boidIgnoresItself = [
   b = Boid position: (Vec2 x: 0.0 y: 0.0) velocity: (Vec2 x: 1.0 y: 0.0)
-  Assert that: (b neighborsIn: {b} within: 50.0) count equals: 0
+  Assert that: (b neighborsIn: {b} within: 50.0 fov: 360.0) count equals: 0
 ]
 
-Test boidOnlySeesAhead = [
+Test viewAngle = [
+  // heading right, with one boid ahead, one to the side, one behind
   b = Boid position: (Vec2 x: 0.0 y: 0.0) velocity: (Vec2 x: 1.0 y: 0.0)
   ahead = Boid position: (Vec2 x: 3.0 y: 0.0) velocity: (Vec2 x: 1.0 y: 0.0)
+  side = Boid position: (Vec2 x: 0.0 y: 3.0) velocity: (Vec2 x: 1.0 y: 0.0)
   behind = Boid position: (Vec2 x: -3.0 y: 0.0) velocity: (Vec2 x: 1.0 y: 0.0)
-  Assert that: (b canSee: ahead) equals: true
-  Assert that: (b canSee: behind) equals: false
+
+  Assert that: (b canSee: ahead fov: 180.0) equals: true
+  Assert that: (b canSee: side fov: 180.0) equals: false
+  Assert that: (b canSee: behind fov: 180.0) equals: false
+
+  Assert that: (b canSee: side fov: 270.0) equals: true
+  Assert that: (b canSee: behind fov: 270.0) equals: false
+
+  Assert that: (b canSee: behind fov: 360.0) equals: true
+  Assert that: (b canSee: ahead fov: 10.0) equals: true
 ]

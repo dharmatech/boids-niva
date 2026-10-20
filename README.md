@@ -33,7 +33,7 @@ native libraries, so it takes a while. It has only been tried on Ubuntu
 
 | Run | What |
 |---|---|
-| `niva run` | A window drawn with Dear ImGui (imgui-java), one step per frame. Esc quits. |
+| `niva run` | A window drawn with Dear ImGui (imgui-java), one step per frame, with a slider for every rule. Esc quits. |
 | `niva run headless.niva` | A 3-boid demo, printed after one and two steps. |
 | `niva run png.niva` | Java2D, no window: writes `frames/frame-0.png` … `frame-400.png`. |
 | `niva test` | Pins the demo's first step to exact values, plus a few rule checks. |
@@ -45,9 +45,9 @@ sharing the rest:
 
 | Folder | What |
 |---|---|
-| `sim/` | The simulation: `Vec2`, `Boid`, `Flock`. |
+| `sim/` | The simulation: `Vec2`, `Boid`, `Flock`, and the `Rules` they follow. |
 | `world/` | Rules only the renderers need: `Screen`, random flocks, edge wrapping, a speed cap. |
-| `imgui/` | ImGui bindings, and `display.niva` (X11 or Wayland, and the scale). |
+| `imgui/` | ImGui bindings, `display.niva` (X11 or Wayland, and the scale), and `panel.niva` (the sliders). |
 | `java2d/` | Java2D bindings, and `Flock saveTo:` for snapshots. |
 | `tests/` | `niva test`. |
 
@@ -59,14 +59,28 @@ Niva methods aren't tied to their type's declaration, so `world/` adds
 just ignores `png`), hence entry files rather than a mode argument. A
 built jar does get them, as `Compiler cliArgs`.
 
+## Tuning the rules
+
+The window's panel has a slider for each `Rules` field (weight and radius
+for cohesion, alignment and separation, plus the view angle) and for the
+speed cap. Weights are on a log scale. **Randomize** picks new values,
+**Defaults** restores them, and **Scatter** starts a fresh random flock
+under the current rules.
+
+The defaults make the boids end up in single file. Two changes give
+broad, evenly spaced flocks instead: widen the view angle to about 270°,
+and make separation real (about 0.05 within 15). With the wider view but
+the default separation, they collapse into tight clumps.
+
 ## Why `world/` caps the speed
 
-The boids in `sim/` only see neighbors ahead of them (`canSee:`).
-Cohesion therefore pulls stragglers forward, and nothing pulls the leaders
-back. With 150 random boids, mean speed goes from 1.6 to 40 px/step over
-1000 steps and keeps climbing. With all-around vision it decays to 0.3
-instead. `sim/` leaves the rules as they are, and `world/` caps speed at
-4 (`Flock maxSpeed`), which is what classic boids do.
+With the default rules, the boids only see neighbors ahead of them
+(`viewAngle` 180). Cohesion therefore pulls stragglers forward, and
+nothing pulls the leaders back. With 150 random boids, mean speed goes
+from 1.6 to 40 px/step over 1000 steps and keeps climbing. With
+all-around vision it decays to 0.3 instead. `sim/` leaves the rules as
+they are, and `world/` caps speed at 4 by default (`Flock maxSpeed`),
+which is what classic boids do.
 
 ## Graphics options
 
@@ -130,14 +144,23 @@ instead. `sim/` leaves the rules as they are, and `world/` caps speed at
   works.
 - No operator precedence between `&&` and comparisons; add parens.
   Arithmetic does have precedence (`2 + 3 * 4` is 14).
-- `%` on Doubles is a remainder, not a floor-mod. There is no `sqrt`;
-  `world/math.bind.niva` binds Kotlin's.
+- `%` on Doubles is a remainder, not a floor-mod. There is no `sqrt` or
+  `cos`; `sim/math.bind.niva` binds Kotlin's.
 - **Compiler bug:** a bound `@emit` unary used as a binary operand
   (`1.0 + x sqrt`) generates broken Kotlin. Assign it to a name first.
 - `niva run` and `niva build` exit 0 even when the Kotlin build fails,
   and `niva build` then leaves the previous build's jar as `main.jar`.
 - `///` doc comments can't go on a type's fields (syntax error), and
   must sit right before `on`, after any `@rename`/`@emit` pragma.
+- Copy-with (`k format: "%.1f"`, a new `k` with one field changed) needs
+  a variable as its receiver. `(Knob range: …) format: "%.1f"` is
+  rejected with "Receiver must be identifier to be used in immutable copy
+  assign".
+- **Compiler bug:** a local variable named like a file breaks the
+  generated Kotlin. Each file is a package, and constructors are emitted
+  package-qualified, so with a variable `flock` in scope, a `Flock` built
+  from `sim/flock.niva` becomes `flock.Flock(…)`, which Kotlin resolves
+  against the variable. That's why the file is `sim/flocking.niva`.
 
 ## License
 

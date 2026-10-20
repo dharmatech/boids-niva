@@ -1,0 +1,97 @@
+// The sliders for the flocking rules, and the buttons under them.
+
+/// One slider: its label, range, and the value it's holding. ImGui writes
+/// the value into `cell`. A weight slider is logarithmic, since the useful
+/// weights span orders of magnitude.
+type Knob
+  label: String
+  min: Float
+  max: Float
+  format: String
+  weight: Bool
+  cell: FloatArray
+
+constructor Knob weight(label): String upTo(max): Float -> Knob =
+  Knob label: label min: 0.0f max: max format: "%.4f" weight: true cell: (FloatArray of: 0.0f)
+
+constructor Knob range(label): String from(min): Float to(max): Float -> Knob =
+  Knob label: label min: min max: max format: "%.0f" weight: false cell: (FloatArray of: min)
+
+extend Knob [
+  on value -> Double = cell first toDouble
+  on value: Double -> Unit = cell first: value toFloat
+
+  on show -> Unit = [
+    flags = weight ifTrue: [ImGuiSliderFlags Logarithmic] ifFalse: [0]
+    ImGui slider: label value: cell min: min max: max format: format flags: flags
+  ]
+
+  /// anywhere in the range; cubed for weights, so small ones come up
+  /// about as often as they would on the log slider
+  on randomize -> Unit = [
+    r = Random nextDouble
+    t = weight ifTrue: [r * r * r] ifFalse: [r]
+    this value: min toDouble + (t * (max - min) toDouble)
+  ]
+]
+
+/// A slider for each Rules field, plus the speed cap from world/.
+type RulesPanel
+  cohesion: Knob
+  cohesionRadius: Knob
+  alignment: Knob
+  alignmentRadius: Knob
+  separation: Knob
+  separationRadius: Knob
+  viewAngle: Knob
+  maxSpeed: Knob
+
+constructor RulesPanel new -> RulesPanel = [
+  // copy-with (`k format: …`) needs a variable as its receiver
+  speed = Knob range: "max speed" from: 0.5f to: 10.0f
+  panel = RulesPanel
+    cohesion: (Knob weight: "cohesion" upTo: 0.2f)
+    cohesionRadius: (Knob range: "cohesion radius" from: 0.0f to: 200.0f)
+    alignment: (Knob weight: "alignment" upTo: 1.0f)
+    alignmentRadius: (Knob range: "alignment radius" from: 0.0f to: 200.0f)
+    separation: (Knob weight: "separation" upTo: 1.0f)
+    separationRadius: (Knob range: "separation radius" from: 0.0f to: 50.0f)
+    viewAngle: (Knob range: "view angle (deg)" from: 0.0f to: 360.0f)
+    maxSpeed: (speed format: "%.1f")
+  panel defaults
+  ^ panel
+]
+
+extend RulesPanel [
+  on knobs -> List::Knob = {
+    cohesion cohesionRadius
+    alignment alignmentRadius
+    separation separationRadius
+    viewAngle maxSpeed
+  }
+
+  on rules -> Rules = Rules
+    cohesion: cohesion value
+    cohesionRadius: cohesionRadius value
+    alignment: alignment value
+    alignmentRadius: alignmentRadius value
+    separation: separation value
+    separationRadius: separationRadius value
+    viewAngle: viewAngle value
+
+  on defaults -> Unit = [
+    r = Rules default
+    cohesion value: r cohesion
+    cohesionRadius value: r cohesionRadius
+    alignment value: r alignment
+    alignmentRadius value: r alignmentRadius
+    separation value: r separation
+    separationRadius value: r separationRadius
+    viewAngle value: r viewAngle
+    maxSpeed value: Flock maxSpeed
+  ]
+
+  on randomize -> Unit = this knobs forEach: [it randomize]
+
+  on show -> Unit = this knobs forEach: [it show]
+]

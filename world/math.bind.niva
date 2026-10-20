@@ -1,8 +1,0 @@
-// Niva's std has no sqrt. Note: `a + x sqrt` miscompiles (the @emit is
-// dropped when it's a binary operand), so bind the result to a name first.
-Bind package: "kotlin.math" content: [
-  extend Double [
-    @emit: "kotlin.math.sqrt($0)"
-    on sqrt -> Double
-  ]
-]

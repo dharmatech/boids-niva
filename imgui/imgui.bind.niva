@@ -17,6 +17,13 @@ Bind package: "imgui" content: [
     /// end of window
     on end -> Unit
     on text: String -> Unit
+    on separator -> Unit
+    on sameLine -> Unit
+    on button: String -> Bool
+
+    @rename: "sliderFloat"
+    /// edits value's one element in place; true if it moved
+    on slider: String value: FloatArray min: Float max: Float format: String flags: Int -> Bool
 
     on isKeyPressed: Int -> Bool
   ]
@@ -64,9 +71,11 @@ Bind package: "imgui" content: [
 Bind package: "imgui.flag" content: [
   type ImGuiKey
   type ImGuiWindowFlags
+  type ImGuiSliderFlags
 ] fields: [
   ImGuiKey Escape: Int
   ImGuiWindowFlags AlwaysAutoResize: Int
+  ImGuiSliderFlags Logarithmic: Int
 ]
 
 Bind package: "org.lwjgl.glfw" content: [
@@ -93,6 +102,27 @@ Bind package: "org.lwjgl.glfw" content: [
   ]
 ] fields: [
   GLFW GLFW_PLATFORM: Int GLFW_PLATFORM_X11: Int GLFW_PLATFORM_WAYLAND: Int
+]
+
+// ImGui's sliders write through a float[], so a one-element FloatArray
+// is the box a slider's value lives in
+Bind package: "kotlin" content: [
+  type FloatArray
+  @emit: "floatArrayOf($1)"
+  constructor FloatArray of: Float -> FloatArray
+  extend FloatArray [
+    on first -> Float
+    @emit: "$0.set(0, $1)"
+    on first: Float -> Unit
+  ]
+]
+
+Bind package: "kotlin.random" content: [
+  type Random
+  constructor Random [
+    /// uniform in [0, 1)
+    on nextDouble -> Double
+  ]
 ]
 
 Bind package: "java.lang" content: [
