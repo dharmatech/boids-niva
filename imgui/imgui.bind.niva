@@ -22,6 +22,9 @@ Bind package: "imgui" content: [
     on separator -> Unit
     on sameLine -> Unit
     on button: String -> Bool
+    /// a header that folds what follows it; true while it's open.
+    /// Starts closed.
+    on collapsingHeader: String -> Bool
 
     @rename: "sliderFloat"
     /// edits value's one element in place; true if it moved

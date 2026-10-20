@@ -62,7 +62,8 @@ built jar does get them, as `Compiler cliArgs`.
 ## Tuning the rules
 
 The window's panel has a slider for each `Rules` field and for the
-speed limits. Weights are on a log scale. **Randomize** picks new
+speed limits, under a **rules** header that starts folded; click it to
+open them. Weights are on a log scale. **Randomize** picks new
 values, **Defaults** restores them, and **Scatter** starts a fresh
 random flock under the current rules.
 

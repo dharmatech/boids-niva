@@ -51,13 +51,14 @@ app = ImGui
       ImGui text: flock boids count toString + " boids"
       ImGui text: io getFramerate toInt toString + " fps"
       ImGui separator
-      panel show
       ImGui button: "Randomize (R)", ifTrue: [panel randomize]
       ImGui sameLine
       ImGui button: "Defaults (D)", ifTrue: [panel defaults]
       ImGui sameLine
       ImGui button: "Scatter (S)", ifTrue: [scatter do]
       ImGui textDisabled: "H hides this panel, Esc quits"
+      // folded at first; above it, the buttons stay put when it opens
+      ImGui collapsingHeader: "rules", ifTrue: [panel show]
       ImGui end
     ]
 
