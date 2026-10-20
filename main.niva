@@ -6,8 +6,9 @@ display = Display open
 "boids: $display" echo
 u = display unit
 
-// how many boids. Up to 500 keeps even the heaviest rules under a 60 Hz
-// frame (11.7 ms a step at 500, 1.4 at 150); the cost grows as n².
+// how many boids. The cost grows as n². At 490, measured here, a step
+// takes 12 ms with the default rules and 17 ms with the heaviest: inside
+// a 30 Hz frame (33 ms), about one 60 Hz frame (16.7 ms). Hence 500.
 population = Knob range: "boids" from: 10.0f to: 500.0f
 population value: Flock boidCount toDouble
 
@@ -15,6 +16,9 @@ population value: Flock boidCount toDouble
 mut flock = Flock random: Flock boidCount across: (Screen width: 900.0 height: 650.0)
 panel = RulesPanel new
 mut showPanel = true
+// milliseconds per sim step, smoothed. fps can't show the cost: vsync
+// holds it at the refresh rate until a step no longer fits in a frame.
+mut stepMs = 0.0
 
 body = ImColor rgb: "#f2c14e"
 beak = ImColor rgb: "#e4572e"
@@ -32,12 +36,16 @@ app = ImGui
     screen = Screen
       width: (io getDisplaySizeX / u) toDouble
       height: (io getDisplaySizeY / u) toDouble
+    started = System nanoTime
     // the slider applies at once: extras go, newcomers appear at random
     sized = flock resizedTo: population value toInt across: screen
     flock <- (sized rules: panel rules)
       stepOn: screen
       minSpeed: panel minSpeed value
       maxSpeed: panel maxSpeed value
+    took = (System nanoTime - started) toDouble / 1000000.0
+    // single steps jump around (JIT warm-up, GC), so average over ~20
+    stepMs <- (stepMs * 0.95) + (took * 0.05)
 
     draw = ImGui getBackgroundDrawList
     flock boids forEach: [b ->
@@ -56,7 +64,8 @@ app = ImGui
       // always fit the text; imgui.ini only keeps where you dragged it
       ImGui begin: "flock" flags: ImGuiWindowFlags AlwaysAutoResize
       population show
-      ImGui text: io getFramerate toInt toString + " fps"
+      step = "%.2f" format: stepMs
+      ImGui text: io getFramerate toInt toString + " fps, step " + step + " ms"
       ImGui separator
       ImGui button: "Randomize (R)", ifTrue: [panel randomize]
       ImGui sameLine

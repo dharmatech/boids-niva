@@ -71,7 +71,7 @@ The **boids** slider at the top sets how many there are, from 10 to
 500, and applies at once: extras vanish and newcomers appear at random.
 The world is as big as the window, so maximizing it spreads the same
 flock thinner; raise the count to keep the density. Scatter uses the
-count too.
+count too. The step time under it shows what the count costs.
 
 Each button has a key, shown on it: **R**, **D** and **S**. **H** hides
 the panel and shows it again, and the keys still work while it's
@@ -148,11 +148,22 @@ otherwise brake them almost to a standstill.
     clean.
 
   It's capped at the monitor's refresh rate by vsync (30 fps on a 30 Hz
-  monitor). A step takes 0.4 ms with 150 boids and the default rules.
-  The cost grows with the square of the count: with the heaviest rules
-  (both blocker rules on, a 360° view, radii of 200) it's 1.4 ms at 150
-  and 11.7 ms at 500, still inside a 60 Hz frame. That's why the boids
-  slider stops at 500.
+  monitor), so fps can't show how much of each frame the simulation
+  uses until it's too late. The **step** time next to it does (smoothed
+  over about 20 steps). The cost grows with the square of the count.
+  Measured in the window on this laptop:
+
+  | Boids | Default rules | Heaviest rules |
+  |---|---|---|
+  | 150 | 1.4 ms | 7.0 ms |
+  | 490 | 12.0 ms | 17.1 ms |
+
+  The heaviest rules are both blocker rules, a 360° view and radii of
+  200. At 490, even they fit a 30 Hz frame (33 ms), and they take about
+  one 60 Hz frame (16.7 ms). That's why the boids slider stops at 500.
+  The same steps in a tight loop run 1.5 to 5 times faster (0.4 ms at
+  150 with the defaults), probably because the CPU clocks down between
+  frames: the gap is widest when the load is lightest.
 - **Java2D** (`png.niva`). Built into the JDK, so no dependencies or
   native libraries. Good for snapshots and tests. A live Swing window
   would need the same `@emit "object : …"` trick the ImGui binding uses,
@@ -172,6 +183,9 @@ otherwise brake them almost to a standstill.
 - A method needs an explicit `-> Type` to be callable from files that
   compile before it (files go in name order).
 - `on:` can't be a keyword, because `on` starts method declarations.
+- A doc comment goes between a pragma and its method (`@emit: …`, then
+  `/// …`, then `on …`). Put it above the pragma and the parse fails with
+  "On expected, but found @".
 - Cascades (`it setTitle: "…"; setWidth: 900`) return the receiver, not
   the last result, so a cascade at the end of a block makes the receiver
   the block's value. On Niva's own types, which are immutable, they do

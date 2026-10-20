@@ -139,6 +139,17 @@ Bind package: "java.lang" content: [
   type System
   constructor System [
     on getenv: String -> String?
+    on nanoTime -> Long
+  ]
+]
+
+Bind package: "kotlin.text" content: [
+  extend String [
+    @emit: "$0.format(java.util.Locale.ROOT, $1)"
+    /// "%.2f" format: 0.4161 is "0.42", with a dot in any locale. Bind
+    /// the result to a name before using it in `+`: an @emit method as a
+    /// binary operand miscompiles.
+    on format: Double -> String
   ]
 ]
 
