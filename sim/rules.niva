@@ -10,29 +10,29 @@
 /// behind them; back off steps away from them. Flake's rule is mostly
 /// back off with a little clear view. Both are off (weight 0) by default.
 type Rules
-  cohesion: Double
-  cohesionRadius: Double
-  alignment: Double
-  alignmentRadius: Double
-  separation: Double
+  cohesion:         Double
+  alignment:        Double
+  separation:       Double
+  cohesionRadius:   Double
+  alignmentRadius:  Double
   separationRadius: Double
-  viewAngle: Double
-  clearView: Double
-  backOff: Double
-  blockerRadius: Double
-  blockerCone: Double
+  viewAngle:        Double
+  clearView:        Double
+  backOff:          Double
+  blockerRadius:    Double
+  blockerCone:      Double
 
 /// the original settings: see only ahead, barely any separation, and
 /// the blocker rules off (the blocker radius and cone are Flake's)
 constructor Rules default -> Rules = Rules
-  cohesion: 0.01
-  cohesionRadius: 50.0
-  alignment: 0.05
-  alignmentRadius: 50.0
-  separation: 0.001
-  separationRadius: 5.0
-  viewAngle: 180.0
-  clearView: 0.0
-  backOff: 0.0
-  blockerRadius: 40.0
-  blockerCone: 90.0
+  cohesion:           0.01
+  alignment:          0.05
+  separation:         0.001
+  cohesionRadius:    50.0
+  alignmentRadius:   50.0
+  separationRadius:   5.0
+  viewAngle:        180.0
+  clearView:          0.0
+  backOff:            0.0
+  blockerRadius:     40.0
+  blockerCone:       90.0
