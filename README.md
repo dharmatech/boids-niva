@@ -47,7 +47,7 @@ sharing the rest:
 |---|---|
 | `sim/` | The simulation: `Vec2`, `Boid`, `Flock`, and the `Rules` they follow. |
 | `world/` | Rules only the renderers need: `Screen`, random flocks, edge wrapping, speed limits. |
-| `imgui/` | ImGui bindings, `display.niva` (X11 or Wayland, and the scale), `knob.niva` (one slider), and `panel.niva` (the rules' sliders). |
+| `imgui/` | ImGui bindings, `display.niva` (X11 or Wayland, and the scale), `knob.niva` (one slider), and `rulesPanel.niva` (the rules' sliders). |
 | `java2d/` | Java2D bindings, and `Flock saveTo:` for snapshots. |
 | `tests/` | `niva test`. |
 
