@@ -62,17 +62,17 @@ constructor RulesPanel new -> RulesPanel = [
   slowest = Knob range: "min speed" from: 0.0f to: 5.0f
   fastest = Knob range: "max speed" from: 0.5f to: 10.0f
   panel = RulesPanel
-    cohesion: (Knob weight: "cohesion" upTo: 0.2f)
-    cohesionRadius: (Knob range: "cohesion radius" from: 0.0f to: 200.0f)
-    alignment: (Knob weight: "alignment" upTo: 1.0f)
-    alignmentRadius: (Knob range: "alignment radius" from: 0.0f to: 200.0f)
-    separation: (Knob weight: "separation" upTo: 1.0f)
-    separationRadius: (Knob range: "separation radius" from: 0.0f to: 50.0f)
-    viewAngle: (Knob range: "view angle (deg)" from: 0.0f to: 360.0f)
-    clearView: (Knob weight: "clear view" upTo: 1.0f)
-    backOff: (Knob weight: "back off" upTo: 1.0f)
-    blockerRadius: (Knob range: "blocker radius" from: 0.0f to: 100.0f)
-    blockerCone: (Knob range: "blocker cone (deg)" from: 0.0f to: 180.0f)
+    cohesion:         (Knob weight: "cohesion"           upTo: 0.2f)
+    alignment:        (Knob weight: "alignment"          upTo: 1.0f)
+    separation:       (Knob weight: "separation"         upTo: 1.0f)
+    clearView:        (Knob weight: "clear view"         upTo: 1.0f)
+    backOff:          (Knob weight: "back off"           upTo: 1.0f)
+    cohesionRadius:   (Knob range:  "cohesion radius"    from: 0.0f to: 200.0f)
+    alignmentRadius:  (Knob range:  "alignment radius"   from: 0.0f to: 200.0f)
+    separationRadius: (Knob range:  "separation radius"  from: 0.0f to: 50.0f)
+    viewAngle:        (Knob range:  "view angle (deg)"   from: 0.0f to: 360.0f)
+    blockerRadius:    (Knob range:  "blocker radius"     from: 0.0f to: 100.0f)
+    blockerCone:      (Knob range:  "blocker cone (deg)" from: 0.0f to: 180.0f)
     minSpeed: (slowest format: "%.1f")
     maxSpeed: (fastest format: "%.1f")
   panel defaults
