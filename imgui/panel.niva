@@ -4,18 +4,30 @@
 /// the value into `cell`. A weight slider is logarithmic, since the useful
 /// weights span orders of magnitude.
 type Knob
-  label: String
-  min: Float
-  max: Float
+  label:  String
+  min:    Float
+  max:    Float
   format: String
   weight: Bool
-  cell: FloatArray
+  cell:   FloatArray
 
 constructor Knob weight(label): String upTo(max): Float -> Knob =
-  Knob label: label min: 0.0f max: max format: "%.4f" weight: true cell: (FloatArray of: 0.0f)
+  Knob
+    label:  label
+    min:    0.0f
+    max:    max
+    format: "%.4f"
+    weight: true
+    cell:   (FloatArray of: 0.0f)
 
 constructor Knob range(label): String from(min): Float to(max): Float -> Knob =
-  Knob label: label min: min max: max format: "%.0f" weight: false cell: (FloatArray of: min)
+  Knob
+    label:  label
+    min:    min
+    max:    max
+    format: "%.0f"
+    weight: false
+    cell:   (FloatArray of: min)
 
 extend Knob [
   on value -> Double = cell first toDouble
@@ -43,19 +55,19 @@ extend Knob [
 
 /// A slider for each Rules field, plus the speed limits from world/.
 type RulesPanel
-  cohesion: Knob
-  cohesionRadius: Knob
-  alignment: Knob
-  alignmentRadius: Knob
-  separation: Knob
+  cohesion:         Knob
+  alignment:        Knob
+  separation:       Knob
+  cohesionRadius:   Knob
+  alignmentRadius:  Knob
   separationRadius: Knob
-  viewAngle: Knob
-  clearView: Knob
-  backOff: Knob
-  blockerRadius: Knob
-  blockerCone: Knob
-  minSpeed: Knob
-  maxSpeed: Knob
+  viewAngle:        Knob
+  clearView:        Knob
+  backOff:          Knob
+  blockerRadius:    Knob
+  blockerCone:      Knob
+  minSpeed:         Knob
+  maxSpeed:         Knob
 
 constructor RulesPanel new -> RulesPanel = [
   // copy-with (`k format: …`) needs a variable as its receiver
@@ -82,41 +94,41 @@ constructor RulesPanel new -> RulesPanel = [
 extend RulesPanel [
   /// the sliders for the Rules fields; the speed limits come after them
   on ruleKnobs -> List::Knob = {
-    cohesion cohesionRadius
-    alignment alignmentRadius
+    cohesion   cohesionRadius
+    alignment  alignmentRadius
     separation separationRadius
     viewAngle
     clearView backOff blockerRadius blockerCone
   }
 
   on rules -> Rules = Rules
-    cohesion: cohesion value
-    cohesionRadius: cohesionRadius value
-    alignment: alignment value
-    alignmentRadius: alignmentRadius value
-    separation: separation value
+    cohesion:         cohesion         value
+    alignment:        alignment        value
+    separation:       separation       value
+    cohesionRadius:   cohesionRadius   value
+    alignmentRadius:  alignmentRadius  value
     separationRadius: separationRadius value
-    viewAngle: viewAngle value
-    clearView: clearView value
-    backOff: backOff value
-    blockerRadius: blockerRadius value
-    blockerCone: blockerCone value
+    viewAngle:        viewAngle        value
+    clearView:        clearView        value
+    backOff:          backOff          value
+    blockerRadius:    blockerRadius    value
+    blockerCone:      blockerCone      value
 
   on defaults -> Unit = [
     r = Rules default
-    cohesion value: r cohesion
-    cohesionRadius value: r cohesionRadius
-    alignment value: r alignment
-    alignmentRadius value: r alignmentRadius
-    separation value: r separation
+    cohesion         value: r cohesion
+    alignment        value: r alignment
+    separation       value: r separation
+    cohesionRadius   value: r cohesionRadius
+    alignmentRadius  value: r alignmentRadius
     separationRadius value: r separationRadius
-    viewAngle value: r viewAngle
-    clearView value: r clearView
-    backOff value: r backOff
-    blockerRadius value: r blockerRadius
-    blockerCone value: r blockerCone
-    minSpeed value: Flock minSpeed
-    maxSpeed value: Flock maxSpeed
+    viewAngle        value: r viewAngle
+    clearView        value: r clearView
+    backOff          value: r backOff
+    blockerRadius    value: r blockerRadius
+    blockerCone      value: r blockerCone
+    minSpeed         value: Flock minSpeed
+    maxSpeed         value: Flock maxSpeed
   ]
 
   on randomize -> Unit = [
@@ -133,7 +145,7 @@ extend RulesPanel [
     // min speed can't pass max speed: the one you drag pushes the other
     minSpeed value > maxSpeed value ifTrue: [
       fasterMoved
-        ifTrue: [minSpeed value: maxSpeed value]
+        ifTrue:  [minSpeed value: maxSpeed value]
         ifFalse: [maxSpeed value: minSpeed value]
     ]
   ]
