@@ -4,7 +4,7 @@
 simulation, written in [Niva](https://github.com/gavr123456789/Niva). It
 runs in a window, headless, or as PNG snapshots.
 
-![150 boids forming flocks in the ImGui window](docs/screenshot.png)
+https://github.com/user-attachments/assets/5e311a39-039e-4267-8bc8-f4c7bcde7f90
 
 ## Getting started
 
@@ -170,13 +170,6 @@ otherwise brake them almost to a standstill.
   native libraries. Good for snapshots and tests. A live Swing window
   would need the same `@emit "object : …"` trick the ImGui binding uses,
   to subclass `JPanel`.
-- **GTK4/Adwaita** (java-gi). bazar's `gtk.bind.niva` covers widgets only
-  (no DrawingArea or Cairo) and uses older syntax.
-- **Raylib**. It isn't in bazar, the Niva repo, or any of gavr's public
-  repos. It would need new bindings to a Java raylib library such as
-  jaylib. raylib's flat static API should map neatly onto `Bind`. Untried.
-- **Compose**. Niva has a `jvmCompose` target, but its help text says
-  "not supported yet", and bazar's Compose examples are in `old/`.
 
 ## Niva gotchas hit along the way
 
