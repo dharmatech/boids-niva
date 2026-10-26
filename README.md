@@ -25,9 +25,15 @@ Niva is changing quickly. This was tested with Niva commit `402e02a6`
 (2026-10-20). If a newer Niva won't compile it, run
 `git checkout 402e02a6` in your Niva clone and build again.
 
+It also builds with the compiler on Niva's `self-host` branch (tested
+with a build from 2026-10-24): `git checkout self-host`, then the same
+`./gradlew buildJvmNiva`. That compiler only reads the `.bind.niva`
+files listed in [`niva.bindings`](niva.bindings); `402e02a6` ignores
+that file.
+
 The first run downloads Gradle dependencies, including imgui-java and its
-native libraries, so it takes a while. It has only been tried on Ubuntu
-(GNOME on Wayland, NVIDIA).
+native libraries, so it takes a while. It's been tried on Ubuntu (GNOME
+on Wayland, NVIDIA), and gavr has run it on macOS.
 
 ## Running
 
@@ -47,7 +53,7 @@ sharing the rest:
 |---|---|
 | `sim/` | The simulation: `Vec2`, `Boid`, `Flock`, and the `Rules` they follow. |
 | `world/` | Rules only the renderers need: `Screen`, random flocks, edge wrapping, speed limits. |
-| `imgui/` | ImGui bindings, `display.niva` (X11 or Wayland, and the scale), `knob.niva` (one slider), and `rulesPanel.niva` (the rules' sliders). |
+| `imgui/` | ImGui bindings, `display.niva` (X11, Wayland or Cocoa, and the scale), `knob.niva` (one slider), and `rulesPanel.niva` (the rules' sliders). |
 | `java2d/` | Java2D bindings, and `Flock saveTo:` for snapshots. |
 | `tests/` | `niva test`. |
 
@@ -130,11 +136,15 @@ otherwise brake them almost to a standstill.
   macOS. Immediate mode suits one-step-per-frame, and it comes with
   sliders and buttons for tuning the rules live.
 
-  The window uses X11 (XWayland on a Wayland desktop), so the desktop
-  draws its usual title bar. It scales itself the way GTK and Qt do,
-  from `Xft.dpi` (on GNOME: monitor scale rounded up, times the Large
-  Text factor), and `BOIDS_SCALE=1.5` overrides that. The sim stays in
-  unscaled units; only drawing is scaled.
+  On macOS the window uses Cocoa. That came from gavr and hasn't been
+  tried here; on a Retina screen everything may be drawn twice as big
+  (`unit` in `display.niva`).
+
+  On Linux the window uses X11 (XWayland on a Wayland desktop), so the
+  desktop draws its usual title bar. It scales itself the way GTK and
+  Qt do, from `Xft.dpi` (on GNOME: monitor scale rounded up, times the
+  Large Text factor), and `BOIDS_SCALE=1.5` overrides that. The sim
+  stays in unscaled units; only drawing is scaled.
 
   `BOIDS_WAYLAND=1` runs it on native Wayland instead. That works and
   scales correctly, but on GNOME:
@@ -200,6 +210,12 @@ otherwise brake them almost to a standstill.
   `cos`; `sim/math.bind.niva` binds Kotlin's.
 - **Compiler bug:** a bound `@emit` unary used as a binary operand
   (`1.0 + x sqrt`) generates broken Kotlin. Assign it to a name first.
+- On the `self-host` branch, a `.bind.niva` file that `niva.bindings`
+  doesn't list is skipped, with only a "Skipping binding without a
+  provider in niva.bindings" line. Then the types it binds come up
+  unrecognized ("These types remained unrecognized after checking all
+  files"). A new bindings file needs a `kotlin|<module>|<path>` line
+  there.
 - `niva run` and `niva build` exit 0 even when the Kotlin build fails,
   and `niva build` then leaves the previous build's jar as `main.jar`.
 - `///` doc comments can't go on a type's fields (syntax error), and

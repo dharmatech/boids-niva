@@ -1,25 +1,29 @@
 // Which windowing system to use, and how big to draw.
 //
-// X11 by default (XWayland on a Wayland desktop): GNOME draws a normal
-// title bar, which it won't do for a JVM app on native Wayland.
-// BOIDS_WAYLAND=1 opts into native Wayland.
+// Cocoa on macOS. On Linux, X11 by default (XWayland on a Wayland
+// desktop): GNOME draws a normal title bar, which it won't do for a JVM
+// app on native Wayland. BOIDS_WAYLAND=1 opts into native Wayland.
 //
 // The scale comes from the desktop (Xft.dpi on X11, the output scale on
-// Wayland), like GTK and Qt. BOIDS_SCALE=1.5 overrides it.
+// Wayland, the backing scale on macOS), like GTK and Qt. BOIDS_SCALE=1.5
+// overrides it.
 
+// platform: GLFW_PLATFORM_COCOA, _WAYLAND or _X11.
 // scale: screen pixels per logical unit.
 // unit: window coordinates per logical unit. X11 coordinates are pixels,
 // so it's `scale`; Wayland coordinates are already scaled by the desktop.
+// Cocoa gets `scale` for now; on a Retina screen it may need Wayland's
+// (asked on PR #2).
 type Display
-  wayland: Bool
-  scale: Float
-  unit: Float
+  platform: Int
+  scale:    Float
+  unit:     Float
 
 constructor Display open -> Display = [
   wayland = (System getenv: "BOIDS_WAYLAND") == "1"
   mac = (System osName) == "Mac OS X"
   platform = | true
-             | mac => GLFW GLFW_PLATFORM_COCOA
+             | mac     => GLFW GLFW_PLATFORM_COCOA
              | wayland => GLFW GLFW_PLATFORM_WAYLAND
              |=> GLFW GLFW_PLATFORM_X11
 
@@ -29,9 +33,9 @@ constructor Display open -> Display = [
   desktop = GLFW primaryMonitorScale
   scale = (System getenv: "BOIDS_SCALE") unpack: [it toFloat] or: desktop
   ^ Display
-    wayland: wayland
-    scale: scale
-    unit: (wayland ifTrue: [scale / desktop] ifFalse: [scale])
+    platform: platform
+    scale:    scale
+    unit:     (wayland ifTrue: [scale / desktop] ifFalse: [scale])
 ]
 
 extend Display [
@@ -46,11 +50,11 @@ extend Display [
   ]
 
   on toString -> String = [
-    platform = | true
-               | (System osName) == "Mac OS X" => "Cocoa"
-               | wayland => "Wayland"
-               |=> "X11"
+    name = | platform
+           | GLFW GLFW_PLATFORM_COCOA   => "Cocoa"
+           | GLFW GLFW_PLATFORM_WAYLAND => "Wayland"
+           |=> "X11"
 
-    ^ platform + ", scale " + scale toString + ", unit " + unit toString
+    ^ name + ", scale " + scale toString + ", unit " + unit toString
   ]
 ]
