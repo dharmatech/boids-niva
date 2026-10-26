@@ -111,7 +111,7 @@ Bind package: "org.lwjgl.glfw" content: [
     on setShouldClose: Long to: Bool -> Unit
   ]
 ] fields: [
-  GLFW GLFW_PLATFORM: Int GLFW_PLATFORM_X11: Int GLFW_PLATFORM_WAYLAND: Int
+  GLFW GLFW_PLATFORM: Int GLFW_PLATFORM_X11: Int GLFW_PLATFORM_WAYLAND: Int GLFW_PLATFORM_COCOA: Int
 ]
 
 // ImGui's sliders write through a float[], so a one-element FloatArray
@@ -139,6 +139,8 @@ Bind package: "java.lang" content: [
   type System
   constructor System [
     on getenv: String -> String?
+    @emit: """java.lang.System.getProperty("os.name")"""
+    on osName -> String
     on nanoTime -> Long
   ]
 ]
