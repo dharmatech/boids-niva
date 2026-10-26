@@ -17,8 +17,11 @@ type Display
 
 constructor Display open -> Display = [
   wayland = (System getenv: "BOIDS_WAYLAND") == "1"
-  GLFW initHint: GLFW GLFW_PLATFORM
-       value: (wayland ifTrue: [GLFW GLFW_PLATFORM_WAYLAND] ifFalse: [GLFW GLFW_PLATFORM_X11])
+  mac = (System osName) == "Mac OS X"
+  platform = mac
+    ifTrue: [GLFW GLFW_PLATFORM_COCOA]
+    ifFalse: [wayland ifTrue: [GLFW GLFW_PLATFORM_WAYLAND] ifFalse: [GLFW GLFW_PLATFORM_X11]]
+  GLFW initHint: GLFW GLFW_PLATFORM value: platform
   GLFW initialize
 
   desktop = GLFW primaryMonitorScale
@@ -41,7 +44,9 @@ extend Display [
   ]
 
   on toString -> String = [
-    platform = wayland ifTrue: ["Wayland"] ifFalse: ["X11"]
+    platform = (System osName) == "Mac OS X"
+      ifTrue: ["Cocoa"]
+      ifFalse: [wayland ifTrue: ["Wayland"] ifFalse: ["X11"]]
     ^ platform + ", scale " + scale toString + ", unit " + unit toString
   ]
 ]
